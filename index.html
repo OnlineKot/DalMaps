@@ -267,6 +267,13 @@
     <div class="row">
       <label style="flex:2"><input type="checkbox" id="chkRotate"> Obracaj mapę w kierunku marszu</label>
     </div>
+    <div class="row">
+      <label style="flex:2"><input type="checkbox" id="chkLearn"> Ucz się długości kroku z marszu</label>
+    </div>
+    <div class="row">
+      <button class="btn" id="btnExport" style="flex:1">📤 Wyślij dane marszu (do analizy w Claude)</button>
+    </div>
+    <div class="row"><span id="exportStatus"></span></div>
     <div class="row"><span id="compassStatus">Kompas: nieaktywny</span></div>
   </details>
 </div>
@@ -370,8 +377,69 @@ const state = {
   wing: LS.get('wing136', null),
   stepLen: LS.get('stepLen', 0.75),
   rotateMap: LS.get('rotateMap', false),
-  route: [], idx: 0, dist: 0, stepsTaken: 0,
+  autoLearn: LS.get('autoLearn', true),
+  route: [], idx: 0, dist: 0, stepsTaken: 0, segSteps: 0,
   floor: 'parter', pedoOn: false,
+};
+
+/* ====================== nauka tempa i długości kroku ====================== */
+const walklog = {
+  session: null,
+  sessions: LS.get('sessions', []),
+  start(){
+    walklog.session = {
+      t0: new Date().toISOString(),
+      route: `${$('selStart').value} → ${$('selCel').value}`,
+      wing: state.wing, cal: compass.offset,
+      stepLen0: state.stepLen, learn: [], steps: 0,
+    };
+  },
+  stop(){
+    if (!walklog.session) return;
+    const s = walklog.session;
+    s.t1 = new Date().toISOString();
+    s.steps = state.stepsTaken;
+    s.stepLen1 = state.stepLen;
+    s.cad = pedo.cadence();
+    walklog.sessions.push(s);
+    if (walklog.sessions.length > 20) walklog.sessions.shift();
+    LS.set('sessions', walklog.sessions);
+    walklog.session = null;
+  },
+  /* odcinek o znanej długości przeszedłeś w N kroków → realna długość kroku */
+  learn(len, steps){
+    if (steps < 8 || len < 8) return;                  // za mała próbka
+    const est = Math.min(1.2, Math.max(0.4, len / steps));
+    if (walklog.session) walklog.session.learn.push({len, steps, est: +est.toFixed(3)});
+    if (state.autoLearn){
+      const v = Math.min(1.2, Math.max(0.4, 0.7*state.stepLen + 0.3*est));
+      state.stepLen = +v.toFixed(3);
+      LS.set('stepLen', state.stepLen);
+      const inp = $('inpStep'); if (inp) inp.value = state.stepLen.toFixed(2);
+    }
+  },
+  async export(){
+    const data = {
+      app: 'DalMaps', ver: 3, exported: new Date().toISOString(),
+      stepLen: state.stepLen, autoLearn: state.autoLearn,
+      wing: state.wing, compassOffset: compass.offset,
+      lastRoute: LS.get('lastRoute', null),
+      sessions: walklog.sessions.concat(walklog.session ? [walklog.session] : []),
+      ua: navigator.userAgent,
+    };
+    const text = 'Dane marszu DalMaps (wklej w rozmowie z Claude):\n' +
+                 JSON.stringify(data, null, 1);
+    try {
+      if (navigator.share){ await navigator.share({title: 'Dane marszu DalMaps', text}); return 'Udostępniono.'; }
+    } catch(e){ /* użytkownik anulował — spróbuj schowka */ }
+    try {
+      await navigator.clipboard.writeText(text);
+      return 'Skopiowano do schowka — wklej w rozmowie z Claude.';
+    } catch(e){
+      prompt('Skopiuj dane ręcznie:', text);
+      return 'Dane pokazane do skopiowania.';
+    }
+  }
 };
 
 /* ====================== geometria tras ====================== */
@@ -545,8 +613,10 @@ function render(){
   }
   $('btnPrev').disabled = !st || state.idx===0;
   $('btnNext').disabled = !st || state.idx>=state.route.length-1;
+  const cad = state.pedoOn ? pedo.cadence() : null;
+  const tempo = cad ? ` · tempo ${cad} kr/min (${(cad*state.stepLen*0.06).toFixed(1)} km/h)` : '';
   $('sensline').textContent = state.pedoOn
-    ? `Krokomierz aktywny · kroki: ${state.stepsTaken} · krok = ${state.stepLen.toFixed(2)} m`
+    ? `Krokomierz aktywny · kroki: ${state.stepsTaken} · krok = ${state.stepLen.toFixed(2)} m${tempo}`
     : `Krokomierz zatrzymany · kroki: ${state.stepsTaken}`;
   updateInstruction();
   updateCompassStatus();
@@ -638,14 +708,14 @@ function updateInstruction(){
 function rebuildRoute(keepPos=false){
   const a = $('selStart').value, b = $('selCel').value;
   state.route = buildRoute(a,b);
-  if (!keepPos){ state.idx = 0; state.dist = 0; }
+  if (!keepPos){ state.idx = 0; state.dist = 0; state.segSteps = 0; }
   state.idx = Math.min(state.idx, Math.max(0, state.route.length-1));
   LS.set('lastRoute', {start:a, cel:b});
   render();
 }
 function gotoStep(i){
   if (i<0 || i>=state.route.length) return;
-  state.idx = i; state.dist = 0; render();
+  state.idx = i; state.dist = 0; state.segSteps = 0; render();
 }
 function advance(meters){
   const st = cur(); if(!st) { render(); return; }
@@ -665,21 +735,44 @@ function advance(meters){
 
 /* ====================== krokomierz ====================== */
 const pedo = {
-  g: {x:0,y:0,z:0}, last: 0, handler: null,
+  g: {x:0,y:0,z:0}, last: 0, handler: null, stepTimes: [],
+  cadence(){ // kroki na minutę z ostatnich 15 s
+    const now = performance.now();
+    const recent = pedo.stepTimes.filter(t => now - t < 15000);
+    if (recent.length < 3) return null;
+    const spanMin = (now - recent[0]) / 60000;
+    if (spanMin <= 0) return null;
+    const c = Math.round(recent.length / spanMin);
+    return (c > 0 && c <= 240) ? c : null;             // poza zakresem = szum
+  },
+  forward(){ // krok zgodny z trasą: postęp + nauka długości kroku
+    state.segSteps++;
+    const prevIdx = state.idx, seg = cur();
+    advance(state.stepLen);
+    if (state.idx > prevIdx){                           // domknięty odcinek
+      walklog.learn(seg.len || 0, state.segSteps);
+      state.segSteps = 0;
+    }
+  },
   onStep(){
     state.stepsTaken++;
+    pedo.stepTimes.push(performance.now());
+    if (pedo.stepTimes.length > 40) pedo.stepTimes.shift();
     const st = cur(), mh = compass.mapHeading();
     if (st && mh !== null){
       const b = bearingAt(st, state.dist);
       if (b !== null){
         const off = Math.abs(angleDiff(mh, b));
-        if (off <= 75) advance(state.stepLen);          // idziesz zgodnie z trasą
-        else if (off >= 105) advance(-state.stepLen);   // idziesz w przeciwną stronę
+        if (off <= 75) pedo.forward();                  // idziesz zgodnie z trasą
+        else if (off >= 105){                           // idziesz w przeciwną stronę
+          state.segSteps = Math.max(0, state.segSteps - 1);
+          advance(-state.stepLen);
+        }
         else render();                                  // bokiem — bez postępu
         return;
       }
     }
-    advance(state.stepLen);                             // brak kompasu: jak dotąd
+    pedo.forward();                                     // brak kompasu: jak dotąd
   },
   onMotion(e){
     const a = e.accelerationIncludingGravity; if(!a || a.x===null) return;
@@ -778,11 +871,13 @@ $('btnPedo').addEventListener('click', async ()=>{
     if (!ok) return;
     await compass.start();          // ten sam gest użytkownika starcza dla obu zgód
     state.pedoOn = true;
+    walklog.start();
     $('btnPedo').textContent = 'Stop krokomierza';
     $('btnPedo').classList.remove('acc'); $('btnPedo').classList.add('ok');
     wake.on();
   } else {
     pedo.stop(); state.pedoOn = false;
+    walklog.stop();
     $('btnPedo').textContent = 'Start krokomierza';
     $('btnPedo').classList.add('acc'); $('btnPedo').classList.remove('ok');
     wake.off();
@@ -798,6 +893,14 @@ $('btnCal').addEventListener('click', async ()=>{
       : 'Kalibracja nieudana — wyznacz trasę i sprawdź, czy kompas ma odczyt.';
     render();
   }, 350);
+});
+$('chkLearn').checked = state.autoLearn;
+$('chkLearn').addEventListener('change', ()=>{
+  state.autoLearn = $('chkLearn').checked;
+  LS.set('autoLearn', state.autoLearn);
+});
+$('btnExport').addEventListener('click', async ()=>{
+  $('exportStatus').textContent = await walklog.export();
 });
 $('chkRotate').checked = state.rotateMap;
 $('chkRotate').addEventListener('change', ()=>{

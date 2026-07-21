@@ -34,7 +34,7 @@
 
   #mapwrap{flex:1;display:flex;align-items:center;justify-content:center;padding:0 .5rem}
   svg{width:100%;max-width:480px;height:auto;display:block;transition:transform .3s ease-out}
-  svg .wall{fill:none;stroke:#6b7686;stroke-width:1}
+  svg .wall{fill:#1d232d;stroke:#8a94a4;stroke-width:1.2}
   svg .zone{fill:#2c3440;stroke:#55606e;stroke-width:.4}
   svg .zone.wing{fill-opacity:.18;stroke-width:.6}
   svg .zone.mark{stroke:var(--accent);stroke-width:.9;fill-opacity:.4}
@@ -91,150 +91,210 @@
 
 <div id="mapwrap">
 
-<!-- UWAGA: geometria pięter jest SCHEMATYCZNA (do skalibrowania z fizycznym
-     planem ppoż. hotelu). Kody stref Z01–Z41 i kolory skrzydeł są w jednym
-     miejscu (WINGS + SVG) — podmiana pod realny plan nie zmienia logiki. -->
+<!-- Bryła wg publicznych informacji o Dalmahoy: dwór (1725) z wykuszami,
+     łącznik z wejściem i recepcją, długie nowe skrzydło pokojowe (L),
+     Leisure Club z basenem na końcu. Układ wnętrz przybliżony — kalibruje
+     go tryb pomiaru trasy. Kody Z01–Z41 z planu ppoż. -->
 
 <svg id="f_parter" viewBox="0 0 100 114">
-  <rect class="wall" x="4" y="4" width="92" height="106" rx="2"/>
-  <rect class="zone" id="z_parter_Z09" x="8"  y="8"  width="26" height="20"/>
-  <rect class="zone" id="z_parter_Z10" x="36" y="8"  width="22" height="20"/>
-  <rect class="zone" id="z_parter_Z06" x="62" y="8"  width="30" height="20"/>
-  <rect class="zone" id="z_parter_Z08" x="8"  y="30" width="28" height="22"/>
-  <rect class="zone" id="z_parter_Z12" x="38" y="30" width="18" height="16"/>
-  <rect class="zone" id="z_parter_Z05" x="62" y="30" width="30" height="40"/>
-  <rect class="zone" id="z_parter_Z11" x="38" y="48" width="18" height="14"/>
-  <rect class="zone" id="z_parter_Z07" x="8"  y="54" width="28" height="24"/>
-  <rect class="zone" id="z_parter_Z03" x="28" y="80" width="24" height="26"/>
-  <rect class="zone" id="z_parter_Z04" x="38" y="86" width="12" height="8"/>
-  <rect class="stairs zone" id="z_parter_Z01" x="53" y="77" width="14" height="13"/>
-  <text class="zlabel" x="10" y="13">Z09</text><text class="rlabel" x="10" y="17">Leisure Club</text>
-  <text class="zlabel" x="38" y="13">Z10</text><text class="rlabel" x="38" y="17">Basen</text>
-  <text class="zlabel" x="64" y="13">Z06</text><text class="rlabel" x="64" y="17">Kuchnia</text>
-  <text class="zlabel" x="10" y="35">Z08</text><text class="rlabel" x="10" y="39">Salon</text>
-  <text class="zlabel" x="40" y="35">Z12</text><text class="rlabel" x="40" y="39">Zaplecze</text>
-  <text class="zlabel" x="64" y="35">Z05</text><text class="rlabel" x="64" y="39">The Pentland</text>
-  <text class="zlabel" x="40" y="53">Z11</text><text class="rlabel" x="40" y="57">WC</text>
-  <text class="zlabel" x="10" y="59">Z07</text><text class="rlabel" x="10" y="63">James Braid Bar</text>
-  <text class="zlabel" x="30" y="85">Z03</text><text class="rlabel" x="30" y="89">Hol</text>
-  <text class="rlabel" x="39" y="91">Recepcja Z04</text>
-  <text class="zlabel" x="54" y="82">Z01–Z02</text><text class="rlabel" x="54" y="85.5">Schody</text>
-  <text class="rlabel" x="44" y="109">▲ Wejście główne</text>
+  <rect x="0" y="0" width="100" height="114" fill="#131a12"/>
+  <path d="M24 114 Q30 96 40 84 L45 78" stroke="#3d434c" stroke-width="7" fill="none" stroke-linecap="round" opacity=".8"/>
+  <ellipse cx="30" cy="103" rx="7" ry="4" fill="#2a2f37"/>
+  <circle cx="12" cy="104" r="3.4" fill="#1c2a17"/><circle cx="70" cy="110" r="3" fill="#1c2a17"/>
+  <circle cx="96" cy="44" r="3" fill="#1c2a17"/><circle cx="96" cy="90" r="2.6" fill="#1c2a17"/>
+  <circle cx="48" cy="14" r="3.2" fill="#1c2a17"/><circle cx="56" cy="30" r="2.6" fill="#1c2a17"/>
+  <g opacity=".85"><polygon points="93,12 95.4,17 93,15.8 90.6,17" fill="#cfd8e3"/><text class="rlabel" x="91.8" y="10.6">N</text></g>
+  <line x1="6" y1="110" x2="22.7" y2="110" stroke="#cfd8e3" stroke-width=".7"/><text class="rlabel" x="6" y="108.4">10 m</text>
+  <!-- bryła: dwór (1725) + łącznik z wejściem + nowe skrzydło (L) + leisure club -->
+  <g>
+    <rect class="wall" x="52" y="62" width="40" height="40"/>
+    <rect class="wall" x="56" y="52" width="28" height="10"/>
+    <rect class="wall" x="90" y="56" width="6" height="6"/>
+    <rect class="wall" x="54" y="102" width="8" height="5"/>
+    <rect class="wall" x="70" y="102" width="8" height="5"/>
+    <rect class="wall" x="40" y="70" width="12" height="24"/>
+    <rect class="wall" x="4" y="74" width="40" height="20"/>
+    <rect class="wall" x="4" y="28" width="20" height="46"/>
+    <rect class="wall" x="4" y="8" width="36" height="20"/>
+  </g>
+  <rect x="41" y="64" width="10" height="6" fill="none" stroke="#8a94a4" stroke-width=".5" stroke-dasharray="1.5 1"/>
+  <text class="rlabel" x="26" y="62.5">▲ Wejście główne</text>
+  <text class="rlabel" x="63" y="66.5">Dwór (1725)</text>
+  <text class="rlabel" x="6" y="72.2">Nowe skrzydło</text>
+  <rect class="zone" id="z_parter_Z03" x="41" y="71" width="10" height="22"/>
+  <rect class="zone" id="z_parter_Z04" x="42" y="76" width="8" height="6"/>
+  <rect class="zone" id="z_parter_Z05" x="81" y="63" width="10" height="24"/>
+  <rect class="zone" id="z_parter_Z06" x="57" y="53" width="26" height="8"/>
+  <rect class="zone" id="z_parter_Z07" x="53" y="92" width="26" height="9"/>
+  <rect class="zone" id="z_parter_Z08" x="53" y="63" width="9" height="26"/>
+  <rect class="zone" id="z_parter_Z09" x="26" y="9" width="13" height="18"/>
+  <rect class="zone" id="z_parter_Z10" x="6" y="10" width="18" height="16" style="fill:#123a52;stroke:#2e6d99"/>
+  <path d="M8 15 q2 -1.4 4 0 t4 0 t4 0 M8 20 q2 -1.4 4 0 t4 0 t4 0" stroke="#2e6d99" stroke-width=".5" fill="none"/>
+  <rect class="zone" id="z_parter_Z11" x="26" y="86" width="8" height="7"/>
+  <rect class="zone" id="z_parter_Z12" x="6" y="32" width="16" height="38"/>
+  <rect class="stairs zone" id="z_parter_Z01" x="64" y="72" width="16" height="18"/>
+  <text class="zlabel" x="42" y="74.6">Z03</text><text class="rlabel" x="42.5" y="79.5">Recepcja</text>
+  <text class="zlabel" x="82" y="67">Z05</text><text class="rlabel" x="82" y="70.5">The Pentland</text>
+  <text class="zlabel" x="58" y="56.6">Z06</text><text class="rlabel" x="63.5" y="56.6">Kuchnia</text>
+  <text class="zlabel" x="54" y="95.6">Z07</text><text class="rlabel" x="54" y="99.2">James Braid Bar</text>
+  <text class="zlabel" x="54" y="67">Z08</text><text class="rlabel" x="54" y="70.5">Salon</text>
+  <text class="zlabel" x="27" y="13">Z09</text><text class="rlabel" x="27" y="16.6">Siłownia</text>
+  <text class="zlabel" x="7" y="14.4">Z10</text><text class="rlabel" x="7" y="18">Basen</text>
+  <text class="zlabel" x="26.6" y="90">Z11</text><text class="rlabel" x="26.6" y="92.4">WC</text>
+  <text class="zlabel" x="7" y="36">Z12</text><text class="rlabel" x="7" y="39.6">Sale konf.</text>
+  <text class="rlabel" x="7" y="43">i zaplecze</text>
+  <text class="zlabel" x="65" y="76">Z01–Z02</text><text class="rlabel" x="65" y="79.4">Schody</text>
+  <text class="rlabel" x="6" y="24.4">Leisure Club</text>
   <g class="route">
-    <path id="p0_wejscie_recepcja"   d="M50 106 V96 L46 92"/>
-    <path id="p0_recepcja_klatka"    d="M46 92 H60 V78"/>
-    <path id="p0_klatka_restauracja" d="M60 78 V50 H76"/>
-    <path id="p0_klatka_bar"         d="M60 78 V66 H22"/>
-    <path id="p0_klatka_spa"         d="M60 78 V30 H21 V24"/>
-    <path id="p0_stairs"             d="M60 88 V78"/>
+    <path id="p0_wejscie_recepcja" d="M46 66 V76"/>
+    <path id="p0_recepcja_klatka" d="M46 80 H64"/>
+    <path id="p0_klatka_restauracja" d="M80 80 H84 V76"/>
+    <path id="p0_klatka_bar" d="M72 90 V96 H64"/>
+    <path id="p0_klatka_spa" d="M64 81 H48 V84 H14 V26"/>
+    <path id="p0_stairs" d="M72 88 V78"/>
   </g>
   <circle class="walker" id="walker_parter" r="1.8"/>
   <polygon class="walker" id="head_parter" points="0,-4.4 1.9,-1.4 -1.9,-1.4" style="stroke:none;fill:var(--accent)"/>
 </svg>
 
 <svg id="f_pietro1" viewBox="0 0 100 114" style="display:none">
-  <rect class="wall" x="4" y="4" width="92" height="106" rx="2"/>
-  <!-- pętla korytarza: prostokąt (20,25)-(80,75); klatka wpięta w (60,75) -->
-  <rect class="wall" x="20" y="25" width="60" height="50"/>
-  <rect class="wall" x="27" y="32" width="46" height="36"/>
-  <!-- skrzydło północne (Z13–Z15) -->
-  <rect class="zone wing" id="z_pietro1_Z13" x="24" y="8" width="16" height="14" style="fill:#1565c0;stroke:#1565c0"/>
-  <rect class="zone wing" id="z_pietro1_Z14" x="42" y="8" width="16" height="14" style="fill:#1565c0;stroke:#1565c0"/>
-  <rect class="zone wing" id="z_pietro1_Z15" x="60" y="8" width="16" height="14" style="fill:#1565c0;stroke:#1565c0"/>
-  <!-- skrzydło wschodnie (Z16–Z17) -->
-  <rect class="zone wing" id="z_pietro1_Z16" x="84" y="28" width="12" height="20" style="fill:#2e7d32;stroke:#2e7d32"/>
-  <rect class="zone wing" id="z_pietro1_Z17" x="84" y="52" width="12" height="20" style="fill:#2e7d32;stroke:#2e7d32"/>
-  <!-- skrzydło zachodnie (Z18–Z19) -->
-  <rect class="zone wing" id="z_pietro1_Z18" x="4"  y="28" width="12" height="20" style="fill:#f9a825;stroke:#f9a825"/>
-  <rect class="zone wing" id="z_pietro1_Z19" x="4"  y="52" width="12" height="20" style="fill:#f9a825;stroke:#f9a825"/>
-  <!-- skrzydło południowe (Z20–Z21) -->
-  <rect class="zone wing" id="z_pietro1_Z20" x="8"  y="79" width="16" height="16" style="fill:#6a1b9a;stroke:#6a1b9a"/>
-  <rect class="zone wing" id="z_pietro1_Z21" x="26" y="79" width="16" height="16" style="fill:#6a1b9a;stroke:#6a1b9a"/>
-  <!-- wnętrze pętli -->
-  <rect class="zone" id="z_pietro1_Z22" x="29" y="34" width="20" height="32"/>
-  <rect class="zone" id="z_pietro1_Z23" x="51" y="34" width="20" height="32"/>
-  <rect class="stairs zone" id="z_pietro1_Z01" x="53" y="77" width="14" height="13"/>
-  <text class="zlabel" x="25" y="13">Z13</text>
-  <text class="zlabel" x="43" y="13">Z14</text>
-  <text class="zlabel" x="61" y="13">Z15</text>
-  <text class="rlabel" x="24" y="6.8">Pokoje — na wprost schodów</text>
-  <text class="zlabel" x="85" y="33">Z16</text><text class="zlabel" x="85" y="57">Z17</text>
-  <text class="zlabel" x="5.5" y="33">Z18</text><text class="zlabel" x="5.5" y="57">Z19</text>
-  <text class="zlabel" x="9"  y="84">Z20</text><text class="zlabel" x="27" y="84">Z21</text>
-  <text class="zlabel" x="31" y="39">Z22</text><text class="rlabel" x="31" y="43">Sala konf.</text>
-  <text class="zlabel" x="53" y="39">Z23</text><text class="rlabel" x="53" y="43">Sala konf.</text>
-  <text class="rlabel" x="22" y="30.5">Główny korytarz (dookoła) · Z24</text>
-  <text class="zlabel" x="54" y="82">Z01–Z02</text><text class="rlabel" x="54" y="85.5">Schody</text>
+  <rect x="0" y="0" width="100" height="114" fill="#131a12"/>
+  <circle cx="12" cy="104" r="3.4" fill="#1c2a17"/><circle cx="70" cy="110" r="3" fill="#1c2a17"/>
+  <circle cx="96" cy="44" r="3" fill="#1c2a17"/><circle cx="48" cy="14" r="3.2" fill="#1c2a17"/>
+  <g opacity=".85"><polygon points="93,12 95.4,17 93,15.8 90.6,17" fill="#cfd8e3"/><text class="rlabel" x="91.8" y="10.6">N</text></g>
+  <line x1="6" y1="110" x2="22.7" y2="110" stroke="#cfd8e3" stroke-width=".7"/><text class="rlabel" x="6" y="108.4">10 m</text>
+  <g>
+    <rect class="wall" x="52" y="62" width="40" height="40"/>
+    <rect class="wall" x="56" y="52" width="28" height="10"/>
+    <rect class="wall" x="90" y="56" width="6" height="6"/>
+    <rect class="wall" x="54" y="102" width="8" height="5"/>
+    <rect class="wall" x="70" y="102" width="8" height="5"/>
+    <rect class="wall" x="40" y="70" width="12" height="24"/>
+    <rect class="wall" x="4" y="74" width="40" height="20"/>
+    <rect class="wall" x="4" y="28" width="20" height="46"/>
+    <rect class="wall" x="4" y="8" width="36" height="20"/>
+  </g>
+  <text class="rlabel" x="63" y="66.5">Dwór (1725)</text>
+  <text class="rlabel" x="6" y="72.2">Nowe skrzydło — pokoje 1xx</text>
+  <text class="rlabel" x="6" y="24.4">Leisure Club (parter)</text>
+  <!-- skrzydło "na wprost schodów": pokoje w aneksie północnym -->
+  <rect class="zone wing" id="z_pietro1_Z13" x="57" y="53" width="8" height="8" style="fill:#1565c0;stroke:#1565c0"/>
+  <rect class="zone wing" id="z_pietro1_Z14" x="67" y="53" width="8" height="8" style="fill:#1565c0;stroke:#1565c0"/>
+  <rect class="zone wing" id="z_pietro1_Z15" x="77" y="53" width="6" height="8" style="fill:#1565c0;stroke:#1565c0"/>
+  <!-- "w prawo": wschodni trakt dworu -->
+  <rect class="zone wing" id="z_pietro1_Z16" x="86.5" y="63" width="5" height="15" style="fill:#2e7d32;stroke:#2e7d32"/>
+  <rect class="zone wing" id="z_pietro1_Z17" x="86.5" y="81" width="5" height="20" style="fill:#2e7d32;stroke:#2e7d32"/>
+  <!-- "w lewo, daleko": nowe skrzydło (najdłuższy korytarz) -->
+  <rect class="zone wing" id="z_pietro1_Z18" x="6" y="75" width="17" height="7" style="fill:#f9a825;stroke:#f9a825"/>
+  <rect class="zone wing" id="z_pietro1_Z19" x="6" y="86" width="17" height="7" style="fill:#f9a825;stroke:#f9a825"/>
+  <line x1="25" y1="75" x2="25" y2="82" stroke="#f9a825" stroke-width=".4" opacity=".5"/>
+  <line x1="30" y1="75" x2="30" y2="82" stroke="#f9a825" stroke-width=".4" opacity=".5"/>
+  <line x1="35" y1="75" x2="35" y2="82" stroke="#f9a825" stroke-width=".4" opacity=".5"/>
+  <line x1="25" y1="86" x2="25" y2="93" stroke="#f9a825" stroke-width=".4" opacity=".5"/>
+  <line x1="30" y1="86" x2="30" y2="93" stroke="#f9a825" stroke-width=".4" opacity=".5"/>
+  <line x1="35" y1="86" x2="35" y2="93" stroke="#f9a825" stroke-width=".4" opacity=".5"/>
+  <!-- "w lewo, blisko": południowy trakt dworu -->
+  <rect class="zone wing" id="z_pietro1_Z20" x="53" y="93" width="11" height="8" style="fill:#6a1b9a;stroke:#6a1b9a"/>
+  <rect class="zone wing" id="z_pietro1_Z21" x="66" y="93" width="12" height="8" style="fill:#6a1b9a;stroke:#6a1b9a"/>
+  <!-- pokoje nad wejściem -->
+  <rect class="zone" id="z_pietro1_Z22" x="41" y="71" width="10" height="10"/>
+  <rect class="zone" id="z_pietro1_Z23" x="41" y="83" width="10" height="10"/>
+  <rect class="stairs zone" id="z_pietro1_Z01" x="64" y="72" width="16" height="18"/>
+  <text class="zlabel" x="58" y="56.8">Z13</text><text class="zlabel" x="68" y="56.8">Z14</text><text class="zlabel" x="77.6" y="56.8">Z15</text>
+  <text class="zlabel" x="86.9" y="66.6">Z16</text><text class="zlabel" x="86.9" y="84.6">Z17</text>
+  <text class="zlabel" x="7" y="78.6">Z18</text><text class="zlabel" x="7" y="89.6">Z19</text>
+  <text class="zlabel" x="54" y="96.6">Z20</text><text class="zlabel" x="67" y="96.6">Z21</text>
+  <text class="zlabel" x="42" y="74.6">Z22</text><text class="zlabel" x="42" y="86.6">Z23</text>
+  <text class="rlabel" x="53" y="90.8">Główny korytarz · Z24</text>
+  <text class="zlabel" x="65" y="76">Z01–Z02</text><text class="rlabel" x="65" y="79.4">Schody</text>
   <g class="route">
-    <path id="p1_stairs"    d="M60 88 V75"/>
-    <path id="p1_loop_full" d="M60 75 H80 V25 H20 V75 Z"/>
-    <!-- łuki pętli: od klatki (60,75) do wejścia w skrzydło; _s = krótszy -->
-    <path id="p1_arc_n_s" d="M60 75 H80 V25 H50"/>
-    <path id="p1_arc_n_l" d="M60 75 H20 V25 H50"/>
-    <path id="p1_arc_e_s" d="M60 75 H80 V50"/>
-    <path id="p1_arc_e_l" d="M60 75 H20 V25 H80 V50"/>
-    <path id="p1_arc_w_s" d="M60 75 H20 V50"/>
-    <path id="p1_arc_w_l" d="M60 75 H80 V25 H20 V50"/>
-    <path id="p1_arc_s_s" d="M60 75 H26"/>
-    <path id="p1_arc_s_l" d="M60 75 H80 V25 H20 V75 H26"/>
-    <!-- korytarze skrzydeł: od pętli do pokoi -->
-    <path id="p1_wing_n" d="M50 25 V14"/>
-    <path id="p1_wing_e" d="M80 50 H90"/>
-    <path id="p1_wing_w" d="M20 50 H10"/>
-    <path id="p1_wing_s" d="M26 75 V90"/>
+    <path id="p1_stairs" d="M76 84 V92"/>
+    <path id="p1_loop_full" d="M76 92 H86 V66 H58 V92 Z"/>
+    <path id="p1_arc_n_s" d="M76 92 H86 V66 H72"/>
+    <path id="p1_arc_n_l" d="M76 92 H58 V66 H72"/>
+    <path id="p1_arc_e_s" d="M76 92 H86 V79"/>
+    <path id="p1_arc_e_l" d="M76 92 H58 V66 H86 V79"/>
+    <path id="p1_arc_w_s" d="M76 92 H58 V79"/>
+    <path id="p1_arc_w_l" d="M76 92 H86 V66 H58 V79"/>
+    <path id="p1_arc_s_s" d="M76 92 H62"/>
+    <path id="p1_arc_s_l" d="M76 92 H86 V66 H58 V92 H62"/>
+    <path id="p1_wing_n" d="M72 66 V57"/>
+    <path id="p1_wing_e" d="M86 79 H90"/>
+    <path id="p1_wing_w" d="M58 79 H48 V84 H10"/>
+    <path id="p1_wing_s" d="M62 92 V98"/>
   </g>
   <circle class="walker" id="walker_pietro1" r="1.8"/>
   <polygon class="walker" id="head_pietro1" points="0,-4.4 1.9,-1.4 -1.9,-1.4" style="stroke:none;fill:var(--accent)"/>
 </svg>
 
 <svg id="f_pietro2" viewBox="0 0 100 114" style="display:none">
-  <rect class="wall" x="4" y="4" width="92" height="106" rx="2"/>
-  <rect class="zone" id="z_pietro2_Z25" x="8"  y="8"  width="20" height="24"/>
-  <rect class="zone" id="z_pietro2_Z26" x="30" y="8"  width="20" height="24"/>
-  <rect class="zone" id="z_pietro2_Z27" x="52" y="8"  width="20" height="24"/>
-  <rect class="zone" id="z_pietro2_Z28" x="74" y="8"  width="18" height="24"/>
-  <rect class="zone" id="z_pietro2_Z29" x="8"  y="46" width="20" height="24"/>
-  <rect class="zone" id="z_pietro2_Z30" x="30" y="46" width="20" height="24"/>
-  <rect class="zone" id="z_pietro2_Z31" x="52" y="46" width="20" height="24"/>
-  <rect class="zone" id="z_pietro2_Z32" x="74" y="46" width="18" height="24"/>
-  <rect class="zone" id="z_pietro2_Z33" x="8"  y="79" width="20" height="16"/>
-  <rect class="zone" id="z_pietro2_Z34" x="30" y="79" width="20" height="16"/>
-  <rect class="stairs zone" id="z_pietro2_Z01" x="53" y="77" width="14" height="13"/>
-  <text class="zlabel" x="10" y="13">Z25</text><text class="zlabel" x="32" y="13">Z26</text>
-  <text class="zlabel" x="54" y="13">Z27</text><text class="zlabel" x="76" y="13">Z28</text>
-  <text class="zlabel" x="10" y="51">Z29</text><text class="zlabel" x="32" y="51">Z30</text>
-  <text class="zlabel" x="54" y="51">Z31</text><text class="zlabel" x="76" y="51">Z32</text>
-  <text class="zlabel" x="10" y="84">Z33</text><text class="zlabel" x="32" y="84">Z34</text>
-  <text class="zlabel" x="54" y="82">Z01–Z02</text><text class="rlabel" x="54" y="85.5">Schody</text>
-  <text class="rlabel" x="8" y="41">Korytarz 2. piętra</text>
+  <rect x="0" y="0" width="100" height="114" fill="#131a12"/>
+  <circle cx="12" cy="104" r="3.4" fill="#1c2a17"/><circle cx="96" cy="44" r="3" fill="#1c2a17"/>
+  <g opacity=".85"><polygon points="93,12 95.4,17 93,15.8 90.6,17" fill="#cfd8e3"/><text class="rlabel" x="91.8" y="10.6">N</text></g>
+  <line x1="6" y1="110" x2="22.7" y2="110" stroke="#cfd8e3" stroke-width=".7"/><text class="rlabel" x="6" y="108.4">10 m</text>
+  <g>
+    <rect class="wall" x="52" y="62" width="40" height="40"/>
+    <rect class="wall" x="56" y="52" width="28" height="10"/>
+    <rect class="wall" x="40" y="70" width="12" height="24"/>
+    <rect class="wall" x="4" y="74" width="40" height="20"/>
+    <rect class="wall" x="4" y="28" width="20" height="46"/>
+  </g>
+  <text class="rlabel" x="63" y="66.5">Dwór — 2. piętro</text>
+  <text class="rlabel" x="6" y="72.2">Nowe skrzydło — pokoje 2xx</text>
+  <rect class="zone" id="z_pietro2_Z25" x="57" y="53" width="12" height="8"/>
+  <rect class="zone" id="z_pietro2_Z26" x="71" y="53" width="12" height="8"/>
+  <rect class="zone" id="z_pietro2_Z27" x="86.5" y="63" width="5" height="15"/>
+  <rect class="zone" id="z_pietro2_Z28" x="86.5" y="81" width="5" height="20"/>
+  <rect class="zone" id="z_pietro2_Z29" x="53" y="93" width="11" height="8"/>
+  <rect class="zone" id="z_pietro2_Z30" x="66" y="93" width="12" height="8"/>
+  <rect class="zone" id="z_pietro2_Z31" x="6" y="75" width="17" height="7"/>
+  <rect class="zone" id="z_pietro2_Z32" x="6" y="86" width="17" height="7"/>
+  <rect class="zone" id="z_pietro2_Z33" x="6" y="32" width="16" height="18"/>
+  <rect class="zone" id="z_pietro2_Z34" x="6" y="52" width="16" height="18"/>
+  <rect class="stairs zone" id="z_pietro2_Z01" x="64" y="72" width="16" height="18"/>
+  <text class="zlabel" x="58" y="56.8">Z25</text><text class="zlabel" x="72" y="56.8">Z26</text>
+  <text class="zlabel" x="86.9" y="66.6">Z27</text><text class="zlabel" x="86.9" y="84.6">Z28</text>
+  <text class="zlabel" x="54" y="96.6">Z29</text><text class="zlabel" x="67" y="96.6">Z30</text>
+  <text class="zlabel" x="7" y="78.6">Z31</text><text class="zlabel" x="7" y="89.6">Z32</text>
+  <text class="zlabel" x="7" y="36">Z33</text><text class="zlabel" x="7" y="56">Z34</text>
+  <text class="zlabel" x="65" y="76">Z01–Z02</text><text class="rlabel" x="65" y="79.4">Schody</text>
   <g class="route">
-    <path id="p2_stairs"   d="M60 88 V74"/>
-    <path id="p2_korytarz" d="M60 74 H14 M60 74 H88"/>
+    <path id="p2_stairs" d="M76 84 V92"/>
+    <path id="p2_korytarz" d="M76 92 H58 V79 H48 V84 H10"/>
   </g>
   <circle class="walker" id="walker_pietro2" r="1.8"/>
   <polygon class="walker" id="head_pietro2" points="0,-4.4 1.9,-1.4 -1.9,-1.4" style="stroke:none;fill:var(--accent)"/>
 </svg>
 
 <svg id="f_pietro3" viewBox="0 0 100 114" style="display:none">
-  <rect class="wall" x="4" y="4" width="92" height="106" rx="2"/>
-  <rect class="zone" id="z_pietro3_Z35" x="14" y="12" width="22" height="26"/>
-  <rect class="zone" id="z_pietro3_Z36" x="40" y="12" width="22" height="26"/>
-  <rect class="zone" id="z_pietro3_Z37" x="66" y="12" width="20" height="26"/>
-  <rect class="zone" id="z_pietro3_Z38" x="14" y="48" width="22" height="24"/>
-  <rect class="zone" id="z_pietro3_Z39" x="40" y="48" width="22" height="24"/>
-  <rect class="zone" id="z_pietro3_Z40" x="66" y="48" width="20" height="24"/>
-  <rect class="zone" id="z_pietro3_Z41" x="14" y="79" width="22" height="16"/>
-  <rect class="stairs zone" id="z_pietro3_Z01" x="53" y="77" width="14" height="13"/>
-  <text class="zlabel" x="16" y="17">Z35</text><text class="zlabel" x="42" y="17">Z36</text>
-  <text class="zlabel" x="68" y="17">Z37</text>
-  <text class="zlabel" x="16" y="53">Z38</text><text class="zlabel" x="42" y="53">Z39</text>
-  <text class="zlabel" x="68" y="53">Z40</text>
-  <text class="zlabel" x="16" y="84">Z41</text>
-  <text class="zlabel" x="54" y="82">Z01–Z02</text><text class="rlabel" x="54" y="85.5">Schody</text>
-  <text class="rlabel" x="14" y="44">Poddasze — 3. piętro</text>
+  <rect x="0" y="0" width="100" height="114" fill="#131a12"/>
+  <circle cx="12" cy="104" r="3.4" fill="#1c2a17"/><circle cx="96" cy="44" r="3" fill="#1c2a17"/>
+  <g opacity=".85"><polygon points="93,12 95.4,17 93,15.8 90.6,17" fill="#cfd8e3"/><text class="rlabel" x="91.8" y="10.6">N</text></g>
+  <line x1="6" y1="110" x2="22.7" y2="110" stroke="#cfd8e3" stroke-width=".7"/><text class="rlabel" x="6" y="108.4">10 m</text>
+  <g>
+    <rect class="wall" x="52" y="62" width="40" height="40"/>
+    <rect class="wall" x="40" y="70" width="12" height="24"/>
+    <rect class="wall" x="4" y="74" width="40" height="20"/>
+    <rect class="wall" x="4" y="28" width="20" height="46"/>
+  </g>
+  <text class="rlabel" x="63" y="66.5">Dwór — poddasze</text>
+  <text class="rlabel" x="6" y="72.2">Nowe skrzydło — pokoje 3xx</text>
+  <rect class="zone" id="z_pietro3_Z35" x="53" y="63" width="9" height="26"/>
+  <rect class="zone" id="z_pietro3_Z36" x="86.5" y="63" width="5" height="38"/>
+  <rect class="zone" id="z_pietro3_Z37" x="53" y="93" width="25" height="8"/>
+  <rect class="zone" id="z_pietro3_Z38" x="6" y="75" width="17" height="7"/>
+  <rect class="zone" id="z_pietro3_Z39" x="6" y="86" width="17" height="7"/>
+  <rect class="zone" id="z_pietro3_Z40" x="6" y="32" width="16" height="18"/>
+  <rect class="zone" id="z_pietro3_Z41" x="6" y="52" width="16" height="18"/>
+  <rect class="stairs zone" id="z_pietro3_Z01" x="64" y="72" width="16" height="18"/>
+  <text class="zlabel" x="54" y="67">Z35</text><text class="zlabel" x="86.9" y="66.6">Z36</text>
+  <text class="zlabel" x="54" y="96.6">Z37</text>
+  <text class="zlabel" x="7" y="78.6">Z38</text><text class="zlabel" x="7" y="89.6">Z39</text>
+  <text class="zlabel" x="7" y="36">Z40</text><text class="zlabel" x="7" y="56">Z41</text>
+  <text class="zlabel" x="65" y="76">Z01–Z02</text><text class="rlabel" x="65" y="79.4">Schody</text>
   <g class="route">
-    <path id="p3_stairs"   d="M60 88 V74"/>
-    <path id="p3_korytarz" d="M60 74 H16 M60 74 H86"/>
+    <path id="p3_stairs" d="M76 84 V92"/>
+    <path id="p3_korytarz" d="M76 92 H58 V79 H48 V84 H10"/>
   </g>
   <circle class="walker" id="walker_pietro3" r="1.8"/>
   <polygon class="walker" id="head_pietro3" points="0,-4.4 1.9,-1.4 -1.9,-1.4" style="stroke:none;fill:var(--accent)"/>
@@ -308,10 +368,10 @@ const FLOOR_LABEL = {parter:'parter', pietro1:'1. piętro', pietro2:'2. piętro'
    do wejścia w skrzydło, len w metrach (szacunek). */
 /* label/dir = jak to widać, stojąc na 1. piętrze plecami do schodów. */
 const WINGS = {
-  polnocne:   {label:'Na wprost',      dir:'na wprost',            color:'#1565c0', arcS:{id:'p1_arc_n_s',len:60}, arcL:{id:'p1_arc_n_l',len:72}, cor:{id:'p1_wing_n',len:7}, zones:['Z13','Z14','Z15']},
-  wschodnie:  {label:'W prawo',        dir:'w prawo',              color:'#2e7d32', arcS:{id:'p1_arc_e_s',len:27}, arcL:{id:'p1_arc_e_l',len:105}, cor:{id:'p1_wing_e',len:6}, zones:['Z16','Z17']},
-  zachodnie:  {label:'W lewo, daleko', dir:'w lewo (do końca)',    color:'#f9a825', arcS:{id:'p1_arc_w_s',len:39}, arcL:{id:'p1_arc_w_l',len:93}, cor:{id:'p1_wing_w',len:6}, zones:['Z18','Z19']},
-  poludniowe: {label:'W lewo, blisko', dir:'w lewo (tuż obok)',    color:'#6a1b9a', arcS:{id:'p1_arc_s_s',len:20}, arcL:{id:'p1_arc_s_l',len:112}, cor:{id:'p1_wing_s',len:9}, zones:['Z20','Z21']},
+  polnocne:   {label:'Na wprost',      dir:'na wprost',            color:'#1565c0', arcS:{id:'p1_arc_n_s',len:30}, arcL:{id:'p1_arc_n_l',len:35}, cor:{id:'p1_wing_n',len:6}, zones:['Z13','Z14','Z15']},
+  wschodnie:  {label:'W prawo',        dir:'w prawo',              color:'#2e7d32', arcS:{id:'p1_arc_e_s',len:14}, arcL:{id:'p1_arc_e_l',len:51}, cor:{id:'p1_wing_e',len:3}, zones:['Z16','Z17']},
+  zachodnie:  {label:'W lewo, daleko', dir:'w lewo (nowe skrzydło)', color:'#f9a825', arcS:{id:'p1_arc_w_s',len:19}, arcL:{id:'p1_arc_w_l',len:46}, cor:{id:'p1_wing_w',len:32}, zones:['Z18','Z19']},
+  poludniowe: {label:'W lewo, blisko', dir:'w lewo (tuż obok)',    color:'#6a1b9a', arcS:{id:'p1_arc_s_s',len:8},  arcL:{id:'p1_arc_s_l',len:56},  cor:{id:'p1_wing_s',len:4}, zones:['Z20','Z21']},
 };
 
 /* Krok trasy. overlays = id ścieżek SVG (pierwsza prowadzi kropkę),
@@ -338,20 +398,20 @@ const POIS = {
 const LEGS = {
   'Recepcja': [
     S('parter', ['p0_recepcja_klatka'], ['Z04','Z03'],
-      'Sprzed lady recepcji przejdź przez hol do głównych schodów.', false, 17, false,
+      'Sprzed lady recepcji przejdź przez hol do głównych schodów w dworze.', false, 11, false,
       'Zejdź z ostatniego stopnia i przejdź przez hol do lady recepcji.')],
   'The Pentland (restauracja)': [
     S('parter', ['p0_klatka_restauracja'], ['Z05'],
-      'Wyjdź z restauracji The Pentland i idź korytarzem prosto do głównych schodów.', false, 26, true,
+      'Wyjdź z restauracji The Pentland i idź do głównych schodów (tuż obok).', false, 5, true,
       'Idź korytarzem prosto — wejście do The Pentland będzie po prawej stronie.')],
   'James Braid Bar': [
     S('parter', ['p0_klatka_bar'], ['Z07'],
-      'Wyjdź z James Braid Bar i idź korytarzem prosto do głównych schodów.', false, 30, true,
+      'Wyjdź z James Braid Bar i idź do głównych schodów obok.', false, 8, true,
       'Idź korytarzem prosto do końca — James Braid Bar (ten z kominkiem) przed Tobą.')],
   'Leisure Club i basen': [
     S('parter', ['p0_klatka_spa'], ['Z09','Z10'],
-      'Z Leisure Club wróć długim korytarzem w stronę głównych schodów.', false, 45, true,
-      'Idź długim korytarzem przez cały budynek — Leisure Club z basenem na jego końcu.')],
+      'Z Leisure Club wróć długim korytarzem nowego skrzydła do dworu i schodów.', false, 65, true,
+      'Idź przez hol w nowe skrzydło i długim korytarzem do końca — Leisure Club z basenem.')],
   /* 'Pokój 136' budowany dynamicznie — zależy od zaznaczonego kierunku. */
 };
 
@@ -362,13 +422,13 @@ function leg136(){ // kroki: pokój 136 → klatka Z01–Z02
       ['Z13','Z14','Z15','Z16','Z17','Z18','Z19','Z20','Z21'],
       'Nie wiem, gdzie jest pokój 136. Zaznacz powyżej, w którą stronę '+
       'idzie się do niego od schodów na 1. piętrze — wtedy poprowadzę '+
-      'najkrótszą drogą.', true, 110)];
+      'najkrótszą drogą.', true, 65)];
   }
   return [
     S('pietro1', [w.cor.id], w.zones,
-      'Wyjdź z pokoju 136 i dojdź bocznym korytarzem do głównego korytarza.',
+      `Wyjdź z pokoju 136 i dojdź korytarzem do głównego korytarza dworu (ok. ${w.cor.len} m).`,
       false, w.cor.len, true,
-      'Skręć w boczny korytarz — pokój 136 jest na jego końcu.'),
+      `Idź korytarzem w stronę pokoju 136 (ok. ${w.cor.len} m) — jest przy jego końcu.`),
     S('pietro1', [w.arcS.id], [],
       `Idź głównym korytarzem w stronę schodów (ok. ${w.arcS.len} m).`,
       false, w.arcS.len, true,

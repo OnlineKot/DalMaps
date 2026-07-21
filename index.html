@@ -65,6 +65,9 @@
   .bar{height:6px;border-radius:3px;background:var(--panel2);overflow:hidden}
   .bar>div{height:100%;width:0;background:var(--accent);transition:width .2s}
   #wingrow{display:flex;gap:.4rem;flex-wrap:wrap}
+  #surveyrow{display:none;flex-wrap:wrap;gap:.4rem}
+  #surveyrow .btn{flex:1 1 30%;font-size:.82rem}
+  #surveyrow.on{display:flex}
   #wingrow .btn{flex:1;font-size:.78rem;padding:.45rem .3rem}
   #wingrow .btn.sel{outline:2px solid var(--accent)}
   details{font-size:.8rem;color:var(--muted)}
@@ -105,14 +108,14 @@
   <rect class="zone" id="z_parter_Z03" x="28" y="80" width="24" height="26"/>
   <rect class="zone" id="z_parter_Z04" x="38" y="86" width="12" height="8"/>
   <rect class="stairs zone" id="z_parter_Z01" x="53" y="77" width="14" height="13"/>
-  <text class="zlabel" x="10" y="13">Z09</text><text class="rlabel" x="10" y="17">Spa</text>
+  <text class="zlabel" x="10" y="13">Z09</text><text class="rlabel" x="10" y="17">Leisure Club</text>
   <text class="zlabel" x="38" y="13">Z10</text><text class="rlabel" x="38" y="17">Basen</text>
   <text class="zlabel" x="64" y="13">Z06</text><text class="rlabel" x="64" y="17">Kuchnia</text>
   <text class="zlabel" x="10" y="35">Z08</text><text class="rlabel" x="10" y="39">Salon</text>
   <text class="zlabel" x="40" y="35">Z12</text><text class="rlabel" x="40" y="39">Zaplecze</text>
-  <text class="zlabel" x="64" y="35">Z05</text><text class="rlabel" x="64" y="39">Restauracja</text>
+  <text class="zlabel" x="64" y="35">Z05</text><text class="rlabel" x="64" y="39">The Pentland</text>
   <text class="zlabel" x="40" y="53">Z11</text><text class="rlabel" x="40" y="57">WC</text>
-  <text class="zlabel" x="10" y="59">Z07</text><text class="rlabel" x="10" y="63">Bar</text>
+  <text class="zlabel" x="10" y="59">Z07</text><text class="rlabel" x="10" y="63">James Braid Bar</text>
   <text class="zlabel" x="30" y="85">Z03</text><text class="rlabel" x="30" y="89">Hol</text>
   <text class="rlabel" x="39" y="91">Recepcja Z04</text>
   <text class="zlabel" x="54" y="82">Z01–Z02</text><text class="rlabel" x="54" y="85.5">Schody</text>
@@ -255,6 +258,18 @@
     <button class="btn acc" id="btnPedo" style="flex:1">Start krokomierza</button>
   </div>
   <div id="sensline"></div>
+  <div class="row">
+    <button class="btn" id="btnSurvey" style="flex:1">📏 Zmierz prawdziwą trasę (tryb pomiaru)</button>
+  </div>
+  <div id="surveyrow">
+    <span id="surveyStatus" style="flex-basis:100%;font-size:.75rem;color:var(--muted)"></span>
+    <button class="btn" data-ev="lewo">⬅ Skręcam w lewo</button>
+    <button class="btn" data-ev="prawo">➡ Skręcam w prawo</button>
+    <button class="btn" data-ev="schody_gora">🪜 Schody w górę</button>
+    <button class="btn" data-ev="schody_dol">🪜 Schody w dół</button>
+    <button class="btn" data-ev="punkt">📍 Ważny punkt</button>
+    <button class="btn acc" data-ev="cel">🏁 Jestem u celu</button>
+  </div>
   <details>
     <summary>Ustawienia</summary>
     <div class="row">
@@ -310,30 +325,33 @@ function reverseSteps(steps){
 }
 
 /* POI + ich "nogi" do klatki Z01–Z02 (kroki w kierunku POI → klatka). */
+/* Prawdziwe nazwy z Dalmahoy Hotel & Country Club: restauracja The
+   Pentland, James Braid Bar, Leisure Club z krytym basenem. Geometria
+   przejść nadal szacunkowa — kalibruje ją tryb pomiaru trasy. */
 const POIS = {
-  'Recepcja':    {floor:'parter'},
-  'Restauracja': {floor:'parter'},
-  'Bar':         {floor:'parter'},
-  'Spa i basen': {floor:'parter'},
-  'Pokój 136':   {floor:'pietro1'},
+  'Recepcja':                {floor:'parter'},
+  'The Pentland (restauracja)': {floor:'parter'},
+  'James Braid Bar':         {floor:'parter'},
+  'Leisure Club i basen':    {floor:'parter'},
+  'Pokój 136':               {floor:'pietro1'},
 };
 const LEGS = {
   'Recepcja': [
     S('parter', ['p0_recepcja_klatka'], ['Z04','Z03'],
       'Sprzed lady recepcji przejdź przez hol do głównych schodów.', false, 17, false,
       'Zejdź z ostatniego stopnia i przejdź przez hol do lady recepcji.')],
-  'Restauracja': [
+  'The Pentland (restauracja)': [
     S('parter', ['p0_klatka_restauracja'], ['Z05'],
-      'Wyjdź z restauracji i idź korytarzem prosto do głównych schodów.', false, 26, true,
-      'Idź korytarzem prosto — wejście do restauracji będzie po prawej stronie.')],
-  'Bar': [
+      'Wyjdź z restauracji The Pentland i idź korytarzem prosto do głównych schodów.', false, 26, true,
+      'Idź korytarzem prosto — wejście do The Pentland będzie po prawej stronie.')],
+  'James Braid Bar': [
     S('parter', ['p0_klatka_bar'], ['Z07'],
-      'Wyjdź z baru i idź korytarzem prosto do głównych schodów.', false, 30, true,
-      'Idź korytarzem prosto do końca — wejście do baru przed Tobą.')],
-  'Spa i basen': [
+      'Wyjdź z James Braid Bar i idź korytarzem prosto do głównych schodów.', false, 30, true,
+      'Idź korytarzem prosto do końca — James Braid Bar (ten z kominkiem) przed Tobą.')],
+  'Leisure Club i basen': [
     S('parter', ['p0_klatka_spa'], ['Z09','Z10'],
-      'Ze spa wróć długim korytarzem w stronę głównych schodów.', false, 45, true,
-      'Idź długim korytarzem przez cały budynek — spa i basen na jego końcu.')],
+      'Z Leisure Club wróć długim korytarzem w stronę głównych schodów.', false, 45, true,
+      'Idź długim korytarzem przez cały budynek — Leisure Club z basenem na jego końcu.')],
   /* 'Pokój 136' budowany dynamicznie — zależy od zaznaczonego kierunku. */
 };
 
@@ -427,6 +445,7 @@ const walklog = {
       wing: state.wing, compassOffset: compass.offset,
       lastRoute: LS.get('lastRoute', null),
       sessions: walklog.sessions.concat(walklog.session ? [walklog.session] : []),
+      surveys: LS.get('surveys', []),
       ua: navigator.userAgent,
     };
     const text = 'Dane marszu DalMaps (wklej w rozmowie z Claude):\n' +
@@ -622,6 +641,7 @@ function render(){
     : `Krokomierz zatrzymany · kroki: ${state.stepsTaken}`;
   updateInstruction();
   updateCompassStatus();
+  survey.status();
 }
 function updateDot(){
   const st = cur(); if(!st) return;
@@ -840,8 +860,9 @@ function initSelects(){
     sel.addEventListener('change', ()=>rebuildRoute(false));
   }
   const last = LS.get('lastRoute', {start:'Recepcja', cel:'Pokój 136'});
-  if (names.includes(last.start)) $('selStart').value = last.start;
-  if (names.includes(last.cel))   $('selCel').value   = last.cel;
+  $('selStart').value = names.includes(last.start) ? last.start : 'Recepcja';
+  $('selCel').value   = names.includes(last.cel) && last.cel !== $('selStart').value
+                        ? last.cel : 'Pokój 136';
 }
 function initWings(){
   const row = $('wingrow');
@@ -867,17 +888,17 @@ function updateWingButtons(){
 }
 $('btnPrev').addEventListener('click', ()=>gotoStep(state.idx-1));
 $('btnNext').addEventListener('click', ()=>gotoStep(state.idx+1));
-$('btnPedo').addEventListener('click', async ()=>{
-  if (!state.pedoOn){
+async function setPedo(on){
+  if (on && !state.pedoOn){
     const ok = await pedo.start();
-    if (!ok) return;
+    if (!ok) return false;
     await compass.start();          // ten sam gest użytkownika starcza dla obu zgód
     state.pedoOn = true;
     walklog.start();
     $('btnPedo').textContent = 'Stop krokomierza';
     $('btnPedo').classList.remove('acc'); $('btnPedo').classList.add('ok');
     wake.on();
-  } else {
+  } else if (!on && state.pedoOn){
     pedo.stop(); state.pedoOn = false;
     walklog.stop();
     $('btnPedo').textContent = 'Start krokomierza';
@@ -885,7 +906,64 @@ $('btnPedo').addEventListener('click', async ()=>{
     wake.off();
   }
   render();
-});
+  return true;
+}
+$('btnPedo').addEventListener('click', ()=>setPedo(!state.pedoOn));
+
+/* ====================== tryb pomiaru trasy ====================== */
+/* Nagrywa realny przebieg: kroki między zdarzeniami (zakręt, schody,
+   punkt, cel) → metry wg nauczonej długości kroku. Eksport tych danych
+   pozwala przebudować plany na prawdziwą geometrię hotelu. */
+const survey = {
+  active: false, name: '', lastSteps: 0, events: [], t0: null,
+  saved: LS.get('surveys', []),
+  async start(){
+    const name = prompt('Co mierzysz? (skąd → dokąd)', 'Recepcja → Pokój 136');
+    if (name === null) return;
+    if (!state.pedoOn && !(await setPedo(true))) return;
+    survey.active = true;
+    survey.name = name || 'trasa';
+    survey.t0 = new Date().toISOString();
+    survey.events = [];
+    survey.lastSteps = state.stepsTaken;
+    $('surveyrow').classList.add('on');
+    $('btnSurvey').textContent = '⏹ Przerwij pomiar';
+    survey.status();
+  },
+  mark(type){
+    if (!survey.active) return;
+    let label = null;
+    if (type === 'punkt') label = prompt('Co to za punkt? (np. drzwi ppoż., winda, recepcja)') || 'punkt';
+    const steps = state.stepsTaken - survey.lastSteps;
+    survey.events.push({type, label, steps, m: +(steps*state.stepLen).toFixed(1)});
+    survey.lastSteps = state.stepsTaken;
+    if (type === 'cel') survey.finish(true);
+    else survey.status();
+  },
+  finish(completed){
+    if (survey.active && (completed || survey.events.length)){
+      survey.saved.push({name: survey.name, t0: survey.t0, t1: new Date().toISOString(),
+                         stepLen: state.stepLen, done: !!completed, events: survey.events});
+      if (survey.saved.length > 10) survey.saved.shift();
+      LS.set('surveys', survey.saved);
+    }
+    survey.active = false;
+    $('surveyrow').classList.remove('on');
+    $('btnSurvey').textContent = '📏 Zmierz prawdziwą trasę (tryb pomiaru)';
+    if (completed) $('sensline').textContent =
+      `Pomiar „${survey.name}" zapisany (${survey.events.length} zdarzeń) — wyślij go przyciskiem 📤 w Ustawieniach.`;
+  },
+  status(){
+    if (!survey.active) return;
+    const sinceLast = state.stepsTaken - survey.lastSteps;
+    $('surveyStatus').textContent =
+      `Pomiar „${survey.name}" · zdarzeń: ${survey.events.length} · od ostatniego: ` +
+      `${sinceLast} kroków (~${(sinceLast*state.stepLen).toFixed(0)} m). Idź i klikaj, co robisz.`;
+  }
+};
+$('btnSurvey').addEventListener('click', ()=>{ survey.active ? survey.finish(false) : survey.start(); });
+document.querySelectorAll('#surveyrow [data-ev]').forEach(b =>
+  b.addEventListener('click', ()=>survey.mark(b.dataset.ev)));
 $('btnCal').addEventListener('click', async ()=>{
   if (!compass.active) await compass.start();
   setTimeout(()=>{                 // daj kompasowi chwilę na pierwszy odczyt

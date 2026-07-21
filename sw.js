@@ -1,5 +1,5 @@
 /* DalMaps — service worker, strategia cache-first (offline w hotelu). */
-const CACHE = 'dalmaps-v4';
+const CACHE = 'dalmaps-v5';
 const ASSETS = [
   './',
   './index.html',

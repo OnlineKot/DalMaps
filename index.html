@@ -3,43 +3,570 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>DalMaps — placeholder</title>
+<meta name="theme-color" content="#10141c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DalMaps">
+<title>DalMaps — Dalmahoy nawigator</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <style>
-  body { font-family: -apple-system, system-ui, sans-serif; margin: 0; padding: 2rem 1.25rem;
-         background: #1a1d23; color: #eee; text-align: center; }
-  h1 { font-size: 1.4rem; }
-  p  { color: #aab; line-height: 1.5; }
-  button { font-size: 1.1rem; padding: .9rem 1.4rem; border: 0; border-radius: 12px;
-           background: #c62828; color: #fff; }
-  #out { margin-top: 1.5rem; font-variant-numeric: tabular-nums; font-size: 1.2rem; }
+  :root{
+    --bg:#10141c; --panel:#1a2029; --panel2:#232b37; --line:#37414f;
+    --txt:#e8edf4; --muted:#98a4b3; --accent:#e53935; --ok:#43a047;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,system-ui,"Segoe UI",Roboto,sans-serif;
+    -webkit-tap-highlight-color:transparent}
+  body{display:flex;flex-direction:column;min-height:100dvh;
+    padding-bottom:env(safe-area-inset-bottom)}
+  header{display:flex;align-items:center;gap:.6rem;padding:.7rem .9rem .4rem}
+  header h1{font-size:1.05rem;margin:0;letter-spacing:.02em}
+  header .sub{font-size:.7rem;color:var(--muted)}
+  #wakebadge{margin-left:auto;font-size:.62rem;color:var(--muted);text-align:right;max-width:9rem}
+
+  .tabs{display:flex;gap:.4rem;padding:.3rem .9rem .5rem}
+  .tabs button{flex:1;padding:.5rem 0;border:1px solid var(--line);border-radius:10px;
+    background:var(--panel);color:var(--muted);font-size:.85rem}
+  .tabs button.on{background:var(--panel2);color:var(--txt);border-color:#5a6a7e}
+
+  #mapwrap{flex:1;display:flex;align-items:center;justify-content:center;padding:0 .5rem}
+  svg{width:100%;max-width:480px;height:auto;display:block}
+  svg .wall{fill:none;stroke:#6b7686;stroke-width:1}
+  svg .zone{fill:#2c3440;stroke:#55606e;stroke-width:.4}
+  svg .zone.wing{fill-opacity:.18;stroke-width:.6}
+  svg .zone.mark{stroke:var(--accent);stroke-width:.9;fill-opacity:.4}
+  svg .zlabel{font-size:3.1px;fill:#cfd8e3;font-weight:600}
+  svg .rlabel{font-size:2.5px;fill:#8d99a8}
+  svg .route path{fill:none;stroke:transparent;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+  svg .route path.on{stroke:var(--accent);stroke-dasharray:3 2.2;animation:dash 1.2s linear infinite}
+  @keyframes dash{to{stroke-dashoffset:-5.2}}
+  svg .walker{fill:#fff;stroke:var(--accent);stroke-width:.9;display:none}
+  svg .stairs{fill:#38445466;stroke:#6b7686;stroke-width:.5}
+
+  #panel{background:var(--panel);border-top:1px solid var(--line);
+    padding:.6rem .9rem .8rem;display:flex;flex-direction:column;gap:.55rem}
+  .row{display:flex;gap:.5rem;align-items:center}
+  select,input[type=number]{flex:1;padding:.55rem .5rem;border-radius:10px;border:1px solid var(--line);
+    background:var(--panel2);color:var(--txt);font-size:.9rem;min-width:0}
+  .btn{padding:.55rem .8rem;border-radius:10px;border:1px solid var(--line);
+    background:var(--panel2);color:var(--txt);font-size:.9rem}
+  .btn.acc{background:var(--accent);border-color:var(--accent);color:#fff}
+  .btn.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+  .btn:disabled{opacity:.4}
+  #steptext{font-size:.95rem;line-height:1.35;min-height:2.6em}
+  #stepmeta{font-size:.75rem;color:var(--muted)}
+  .bar{height:6px;border-radius:3px;background:var(--panel2);overflow:hidden}
+  .bar>div{height:100%;width:0;background:var(--accent);transition:width .2s}
+  #wingrow{display:flex;gap:.4rem;flex-wrap:wrap}
+  #wingrow .btn{flex:1;font-size:.78rem;padding:.45rem .3rem}
+  #wingrow .btn.sel{outline:2px solid var(--accent)}
+  details{font-size:.8rem;color:var(--muted)}
+  details .row{margin-top:.45rem}
+  #sensline{font-size:.72rem;color:var(--muted)}
 </style>
 </head>
 <body>
-<h1>DalMaps — strona tymczasowa</h1>
-<p>To placeholder do weryfikacji HTTPS na GitHub Pages.<br>
-Docelowo tu trafi zawartość <code>dalmahoy-nawigator.html</code>.</p>
-<button id="go">Test czujników (DeviceMotion)</button>
-<div id="out">—</div>
+<header>
+  <h1>DalMaps</h1>
+  <span class="sub">Dalmahoy · strefy ppoż.</span>
+  <span id="wakebadge"></span>
+</header>
+
+<div class="tabs" id="tabs">
+  <button data-f="parter" class="on">Parter</button>
+  <button data-f="pietro1">1. piętro</button>
+  <button data-f="pietro2">2. piętro</button>
+  <button data-f="pietro3">3. piętro</button>
+</div>
+
+<div id="mapwrap">
+
+<!-- UWAGA: geometria pięter jest SCHEMATYCZNA (do skalibrowania z fizycznym
+     planem ppoż. hotelu). Kody stref Z01–Z41 i kolory skrzydeł są w jednym
+     miejscu (WINGS + SVG) — podmiana pod realny plan nie zmienia logiki. -->
+
+<svg id="f_parter" viewBox="0 0 100 114">
+  <rect class="wall" x="4" y="4" width="92" height="106" rx="2"/>
+  <rect class="zone" id="z_parter_Z09" x="8"  y="8"  width="26" height="20"/>
+  <rect class="zone" id="z_parter_Z10" x="36" y="8"  width="22" height="20"/>
+  <rect class="zone" id="z_parter_Z06" x="62" y="8"  width="30" height="20"/>
+  <rect class="zone" id="z_parter_Z08" x="8"  y="30" width="28" height="22"/>
+  <rect class="zone" id="z_parter_Z12" x="38" y="30" width="18" height="16"/>
+  <rect class="zone" id="z_parter_Z05" x="62" y="30" width="30" height="40"/>
+  <rect class="zone" id="z_parter_Z11" x="38" y="48" width="18" height="14"/>
+  <rect class="zone" id="z_parter_Z07" x="8"  y="54" width="28" height="24"/>
+  <rect class="zone" id="z_parter_Z03" x="28" y="80" width="24" height="26"/>
+  <rect class="zone" id="z_parter_Z04" x="38" y="86" width="12" height="8"/>
+  <rect class="stairs zone" id="z_parter_Z01" x="53" y="77" width="14" height="13"/>
+  <text class="zlabel" x="10" y="13">Z09</text><text class="rlabel" x="10" y="17">Spa</text>
+  <text class="zlabel" x="38" y="13">Z10</text><text class="rlabel" x="38" y="17">Basen</text>
+  <text class="zlabel" x="64" y="13">Z06</text><text class="rlabel" x="64" y="17">Kuchnia</text>
+  <text class="zlabel" x="10" y="35">Z08</text><text class="rlabel" x="10" y="39">Salon</text>
+  <text class="zlabel" x="40" y="35">Z12</text><text class="rlabel" x="40" y="39">Zaplecze</text>
+  <text class="zlabel" x="64" y="35">Z05</text><text class="rlabel" x="64" y="39">Restauracja</text>
+  <text class="zlabel" x="40" y="53">Z11</text><text class="rlabel" x="40" y="57">WC</text>
+  <text class="zlabel" x="10" y="59">Z07</text><text class="rlabel" x="10" y="63">Bar</text>
+  <text class="zlabel" x="30" y="85">Z03</text><text class="rlabel" x="30" y="89">Hol</text>
+  <text class="rlabel" x="39" y="91">Recepcja Z04</text>
+  <text class="zlabel" x="54" y="82">Z01–Z02</text><text class="rlabel" x="54" y="85.5">Klatka</text>
+  <text class="rlabel" x="44" y="109">▲ Wejście główne</text>
+  <g class="route">
+    <path id="p0_wejscie_recepcja"   d="M50 106 V96 L46 92"/>
+    <path id="p0_recepcja_klatka"    d="M46 92 H60 V78"/>
+    <path id="p0_klatka_restauracja" d="M60 78 V50 H76"/>
+    <path id="p0_klatka_bar"         d="M60 78 V66 H22"/>
+    <path id="p0_klatka_spa"         d="M60 78 V30 H21 V24"/>
+    <path id="p0_stairs"             d="M60 88 V78"/>
+  </g>
+  <circle class="walker" id="walker_parter" r="1.8"/>
+</svg>
+
+<svg id="f_pietro1" viewBox="0 0 100 114" style="display:none">
+  <rect class="wall" x="4" y="4" width="92" height="106" rx="2"/>
+  <!-- pętla korytarza: prostokąt (20,25)-(80,75); klatka wpięta w (60,75) -->
+  <rect class="wall" x="20" y="25" width="60" height="50"/>
+  <rect class="wall" x="27" y="32" width="46" height="36"/>
+  <!-- skrzydło północne (Z13–Z15) -->
+  <rect class="zone wing" id="z_pietro1_Z13" x="24" y="8" width="16" height="14" style="fill:#1565c0;stroke:#1565c0"/>
+  <rect class="zone wing" id="z_pietro1_Z14" x="42" y="8" width="16" height="14" style="fill:#1565c0;stroke:#1565c0"/>
+  <rect class="zone wing" id="z_pietro1_Z15" x="60" y="8" width="16" height="14" style="fill:#1565c0;stroke:#1565c0"/>
+  <!-- skrzydło wschodnie (Z16–Z17) -->
+  <rect class="zone wing" id="z_pietro1_Z16" x="84" y="28" width="12" height="20" style="fill:#2e7d32;stroke:#2e7d32"/>
+  <rect class="zone wing" id="z_pietro1_Z17" x="84" y="52" width="12" height="20" style="fill:#2e7d32;stroke:#2e7d32"/>
+  <!-- skrzydło zachodnie (Z18–Z19) -->
+  <rect class="zone wing" id="z_pietro1_Z18" x="4"  y="28" width="12" height="20" style="fill:#f9a825;stroke:#f9a825"/>
+  <rect class="zone wing" id="z_pietro1_Z19" x="4"  y="52" width="12" height="20" style="fill:#f9a825;stroke:#f9a825"/>
+  <!-- skrzydło południowe (Z20–Z21) -->
+  <rect class="zone wing" id="z_pietro1_Z20" x="8"  y="79" width="16" height="16" style="fill:#6a1b9a;stroke:#6a1b9a"/>
+  <rect class="zone wing" id="z_pietro1_Z21" x="26" y="79" width="16" height="16" style="fill:#6a1b9a;stroke:#6a1b9a"/>
+  <!-- wnętrze pętli -->
+  <rect class="zone" id="z_pietro1_Z22" x="29" y="34" width="20" height="32"/>
+  <rect class="zone" id="z_pietro1_Z23" x="51" y="34" width="20" height="32"/>
+  <rect class="stairs zone" id="z_pietro1_Z01" x="53" y="77" width="14" height="13"/>
+  <text class="zlabel" x="25" y="13">Z13</text>
+  <text class="zlabel" x="43" y="13">Z14</text>
+  <text class="zlabel" x="61" y="13">Z15</text>
+  <text class="rlabel" x="24" y="6.8">Skrzydło północne</text>
+  <text class="zlabel" x="85" y="33">Z16</text><text class="zlabel" x="85" y="57">Z17</text>
+  <text class="zlabel" x="5.5" y="33">Z18</text><text class="zlabel" x="5.5" y="57">Z19</text>
+  <text class="zlabel" x="9"  y="84">Z20</text><text class="zlabel" x="27" y="84">Z21</text>
+  <text class="zlabel" x="31" y="39">Z22</text><text class="rlabel" x="31" y="43">Sala konf.</text>
+  <text class="zlabel" x="53" y="39">Z23</text><text class="rlabel" x="53" y="43">Sala konf.</text>
+  <text class="rlabel" x="22" y="30.5">Pętla korytarza · Z24</text>
+  <text class="zlabel" x="54" y="82">Z01–Z02</text><text class="rlabel" x="54" y="85.5">Klatka</text>
+  <g class="route">
+    <path id="p1_stairs"    d="M60 88 V75"/>
+    <path id="p1_loop_full" d="M60 75 H80 V25 H20 V75 Z"/>
+    <!-- łuki pętli: od klatki (60,75) do wejścia w skrzydło; _s = krótszy -->
+    <path id="p1_arc_n_s" d="M60 75 H80 V25 H50"/>
+    <path id="p1_arc_n_l" d="M60 75 H20 V25 H50"/>
+    <path id="p1_arc_e_s" d="M60 75 H80 V50"/>
+    <path id="p1_arc_e_l" d="M60 75 H20 V25 H80 V50"/>
+    <path id="p1_arc_w_s" d="M60 75 H20 V50"/>
+    <path id="p1_arc_w_l" d="M60 75 H80 V25 H20 V50"/>
+    <path id="p1_arc_s_s" d="M60 75 H26"/>
+    <path id="p1_arc_s_l" d="M60 75 H80 V25 H20 V75 H26"/>
+    <!-- korytarze skrzydeł: od pętli do pokoi -->
+    <path id="p1_wing_n" d="M50 25 V14"/>
+    <path id="p1_wing_e" d="M80 50 H90"/>
+    <path id="p1_wing_w" d="M20 50 H10"/>
+    <path id="p1_wing_s" d="M26 75 V90"/>
+  </g>
+  <circle class="walker" id="walker_pietro1" r="1.8"/>
+</svg>
+
+<svg id="f_pietro2" viewBox="0 0 100 114" style="display:none">
+  <rect class="wall" x="4" y="4" width="92" height="106" rx="2"/>
+  <rect class="zone" id="z_pietro2_Z25" x="8"  y="8"  width="20" height="24"/>
+  <rect class="zone" id="z_pietro2_Z26" x="30" y="8"  width="20" height="24"/>
+  <rect class="zone" id="z_pietro2_Z27" x="52" y="8"  width="20" height="24"/>
+  <rect class="zone" id="z_pietro2_Z28" x="74" y="8"  width="18" height="24"/>
+  <rect class="zone" id="z_pietro2_Z29" x="8"  y="46" width="20" height="24"/>
+  <rect class="zone" id="z_pietro2_Z30" x="30" y="46" width="20" height="24"/>
+  <rect class="zone" id="z_pietro2_Z31" x="52" y="46" width="20" height="24"/>
+  <rect class="zone" id="z_pietro2_Z32" x="74" y="46" width="18" height="24"/>
+  <rect class="zone" id="z_pietro2_Z33" x="8"  y="79" width="20" height="16"/>
+  <rect class="zone" id="z_pietro2_Z34" x="30" y="79" width="20" height="16"/>
+  <rect class="stairs zone" id="z_pietro2_Z01" x="53" y="77" width="14" height="13"/>
+  <text class="zlabel" x="10" y="13">Z25</text><text class="zlabel" x="32" y="13">Z26</text>
+  <text class="zlabel" x="54" y="13">Z27</text><text class="zlabel" x="76" y="13">Z28</text>
+  <text class="zlabel" x="10" y="51">Z29</text><text class="zlabel" x="32" y="51">Z30</text>
+  <text class="zlabel" x="54" y="51">Z31</text><text class="zlabel" x="76" y="51">Z32</text>
+  <text class="zlabel" x="10" y="84">Z33</text><text class="zlabel" x="32" y="84">Z34</text>
+  <text class="zlabel" x="54" y="82">Z01–Z02</text><text class="rlabel" x="54" y="85.5">Klatka</text>
+  <text class="rlabel" x="8" y="41">Korytarz 2. piętra</text>
+  <g class="route">
+    <path id="p2_stairs"   d="M60 88 V74"/>
+    <path id="p2_korytarz" d="M60 74 H14 M60 74 H88"/>
+  </g>
+  <circle class="walker" id="walker_pietro2" r="1.8"/>
+</svg>
+
+<svg id="f_pietro3" viewBox="0 0 100 114" style="display:none">
+  <rect class="wall" x="4" y="4" width="92" height="106" rx="2"/>
+  <rect class="zone" id="z_pietro3_Z35" x="14" y="12" width="22" height="26"/>
+  <rect class="zone" id="z_pietro3_Z36" x="40" y="12" width="22" height="26"/>
+  <rect class="zone" id="z_pietro3_Z37" x="66" y="12" width="20" height="26"/>
+  <rect class="zone" id="z_pietro3_Z38" x="14" y="48" width="22" height="24"/>
+  <rect class="zone" id="z_pietro3_Z39" x="40" y="48" width="22" height="24"/>
+  <rect class="zone" id="z_pietro3_Z40" x="66" y="48" width="20" height="24"/>
+  <rect class="zone" id="z_pietro3_Z41" x="14" y="79" width="22" height="16"/>
+  <rect class="stairs zone" id="z_pietro3_Z01" x="53" y="77" width="14" height="13"/>
+  <text class="zlabel" x="16" y="17">Z35</text><text class="zlabel" x="42" y="17">Z36</text>
+  <text class="zlabel" x="68" y="17">Z37</text>
+  <text class="zlabel" x="16" y="53">Z38</text><text class="zlabel" x="42" y="53">Z39</text>
+  <text class="zlabel" x="68" y="53">Z40</text>
+  <text class="zlabel" x="16" y="84">Z41</text>
+  <text class="zlabel" x="54" y="82">Z01–Z02</text><text class="rlabel" x="54" y="85.5">Klatka</text>
+  <text class="rlabel" x="14" y="44">Poddasze — 3. piętro</text>
+  <g class="route">
+    <path id="p3_stairs"   d="M60 88 V74"/>
+    <path id="p3_korytarz" d="M60 74 H16 M60 74 H86"/>
+  </g>
+  <circle class="walker" id="walker_pietro3" r="1.8"/>
+</svg>
+</div>
+
+<div id="panel">
+  <div class="row">
+    <select id="selStart"></select>
+    <span style="color:var(--muted)">→</span>
+    <select id="selCel"></select>
+  </div>
+  <div id="wingrow"></div>
+  <div id="steptext">Wybierz start i cel, aby wyznaczyć trasę.</div>
+  <div class="bar"><div id="stepbar"></div></div>
+  <div id="stepmeta"></div>
+  <div class="row">
+    <button class="btn" id="btnPrev">‹ Krok</button>
+    <button class="btn" id="btnNext">Krok ›</button>
+    <button class="btn acc" id="btnPedo" style="flex:1">Start krokomierza</button>
+  </div>
+  <div id="sensline"></div>
+  <details>
+    <summary>Ustawienia</summary>
+    <div class="row">
+      <label style="flex:2">Długość kroku [m]</label>
+      <input type="number" id="inpStep" min="0.4" max="1.2" step="0.01" style="flex:1">
+    </div>
+  </details>
+</div>
+
 <script>
-// Minimalny test akceptacyjny: zgoda na czujniki na iOS wymaga HTTPS + gestu użytkownika.
-document.getElementById('go').addEventListener('click', async () => {
-  const out = document.getElementById('out');
-  try {
-    if (typeof DeviceMotionEvent !== 'undefined' &&
-        typeof DeviceMotionEvent.requestPermission === 'function') {
-      const st = await DeviceMotionEvent.requestPermission();
-      if (st !== 'granted') { out.textContent = 'Brak zgody: ' + st; return; }
-    }
-    let n = 0;
-    window.addEventListener('devicemotion', e => {
-      const a = e.accelerationIncludingGravity;
-      if (a) out.textContent = `próbka #${++n}: ${a.x?.toFixed(2)}, ${a.y?.toFixed(2)}, ${a.z?.toFixed(2)} m/s²`;
-    });
-    out.textContent = 'Czujniki OK — porusz telefonem…';
-  } catch (err) {
-    out.textContent = 'Błąd: ' + err.message;
+'use strict';
+/* ====================== stałe / localStorage ====================== */
+const LS = {
+  get(k, d){ try{ const v = localStorage.getItem('dalmaps.'+k); return v===null? d : JSON.parse(v);}catch(e){return d;} },
+  set(k, v){ try{ localStorage.setItem('dalmaps.'+k, JSON.stringify(v)); }catch(e){} }
+};
+const FLOORS = ['parter','pietro1','pietro2','pietro3'];
+const FLOOR_LABEL = {parter:'parter', pietro1:'1. piętro', pietro2:'2. piętro', pietro3:'3. piętro'};
+
+/* Skrzydła 1. piętra. Kolory = kolory na fizycznym planie ppoż. (placeholder
+   do skalibrowania). arcS/arcL = krótszy/dłuższy łuk pętli od klatki Z01–Z02
+   do wejścia w skrzydło, len w metrach (szacunek). */
+const WINGS = {
+  polnocne:   {label:'Północne',  color:'#1565c0', arcS:{id:'p1_arc_n_s',len:60}, arcL:{id:'p1_arc_n_l',len:72}, cor:{id:'p1_wing_n',len:7}, zones:['Z13','Z14','Z15']},
+  wschodnie:  {label:'Wschodnie', color:'#2e7d32', arcS:{id:'p1_arc_e_s',len:27}, arcL:{id:'p1_arc_e_l',len:105}, cor:{id:'p1_wing_e',len:6}, zones:['Z16','Z17']},
+  zachodnie:  {label:'Zachodnie', color:'#f9a825', arcS:{id:'p1_arc_w_s',len:39}, arcL:{id:'p1_arc_w_l',len:93}, cor:{id:'p1_wing_w',len:6}, zones:['Z18','Z19']},
+  poludniowe: {label:'Południowe',color:'#6a1b9a', arcS:{id:'p1_arc_s_s',len:20}, arcL:{id:'p1_arc_s_l',len:112}, cor:{id:'p1_wing_s',len:9}, zones:['Z20','Z21']},
+};
+
+/* Krok trasy. overlays = id ścieżek SVG (pierwsza prowadzi kropkę),
+   marks = kody stref do podświetlenia, len = metry, rev = kropka idzie
+   od końca ścieżki, rtext = opis dla kierunku odwrotnego. */
+function S(floor, overlays, marks, text, wingPick=false, len=0, rev=false, rtext=null){
+  return {floor, overlays, marks, text, wingPick, len, rev, rtext};
+}
+function reverseSteps(steps){
+  return steps.slice().reverse().map(s => ({...s, rev:!s.rev, text:(s.rtext||s.text), rtext:s.text}));
+}
+
+/* POI + ich "nogi" do klatki Z01–Z02 (kroki w kierunku POI → klatka). */
+const POIS = {
+  'Recepcja':    {floor:'parter'},
+  'Restauracja': {floor:'parter'},
+  'Bar':         {floor:'parter'},
+  'Spa i basen': {floor:'parter'},
+  'Pokój 136':   {floor:'pietro1'},
+};
+const LEGS = {
+  'Recepcja': [
+    S('parter', ['p0_recepcja_klatka'], ['Z04','Z03'],
+      'Od recepcji przejdź holem do klatki schodowej Z01–Z02.', false, 17, false,
+      'Wyjdź z klatki Z01–Z02 i przejdź holem do recepcji.')],
+  'Restauracja': [
+    S('parter', ['p0_klatka_restauracja'], ['Z05'],
+      'Z restauracji idź korytarzem na zachód do klatki Z01–Z02.', false, 26, true,
+      'Idź korytarzem na wschód, wejście do restauracji (Z05) po prawej.')],
+  'Bar': [
+    S('parter', ['p0_klatka_bar'], ['Z07'],
+      'Z baru idź korytarzem na wschód do klatki Z01–Z02.', false, 30, true,
+      'Idź korytarzem na zachód do baru (Z07).')],
+  'Spa i basen': [
+    S('parter', ['p0_klatka_spa'], ['Z09','Z10'],
+      'Ze spa wróć korytarzem na południe do klatki Z01–Z02.', false, 45, true,
+      'Idź korytarzem na północ, spa i basen (Z09–Z10) na końcu.')],
+  /* 'Pokój 136' budowany dynamicznie — zależy od przypiętego skrzydła. */
+};
+
+function leg136(){ // kroki: pokój 136 → klatka Z01–Z02
+  const w = state.wing && WINGS[state.wing];
+  if (!w){
+    return [S('pietro1', ['p1_loop_full'],
+      ['Z13','Z14','Z15','Z16','Z17','Z18','Z19','Z20','Z21'],
+      'Nie wiem, w którym skrzydle jest pokój 136 — przypnij skrzydło powyżej, '+
+      'a poprowadzę krótszym łukiem pętli zamiast całej pętli.', true, 110)];
   }
+  return [
+    S('pietro1', [w.cor.id], w.zones,
+      `Spod pokoju 136 dojdź korytarzem skrzydła (${w.label.toLowerCase()}) do pętli.`,
+      false, w.cor.len, true,
+      `Korytarzem skrzydła (${w.label.toLowerCase()}) do pokoju 136.`),
+    S('pietro1', [w.arcS.id], [],
+      `Krótszym łukiem pętli do klatki Z01–Z02 (ok. ${w.arcS.len} m).`,
+      false, w.arcS.len, true,
+      `Z klatki Z01–Z02 idź krótszym łukiem pętli w stronę skrzydła ${w.label.toLowerCase()}go (ok. ${w.arcS.len} m).`),
+  ];
+}
+function legsFor(poi){ return poi==='Pokój 136' ? leg136() : (LEGS[poi]||[]); }
+
+const STAIR_PATH = {parter:'p0_stairs', pietro1:'p1_stairs', pietro2:'p2_stairs', pietro3:'p3_stairs'};
+function stairStep(fromFloor, toFloor){
+  const up = FLOORS.indexOf(toFloor) > FLOORS.indexOf(fromFloor);
+  return S(toFloor, [STAIR_PATH[toFloor]], ['Z01','Z02'],
+    `Klatką schodową Z01–Z02 ${up?'wejdź na':'zejdź na'} ${FLOOR_LABEL[toFloor]}.`, false, 8);
+}
+function buildRoute(a, b){
+  if (!a || !b || a===b) return [];
+  const fa = POIS[a].floor, fb = POIS[b].floor;
+  const steps = [...legsFor(a)];
+  if (fa !== fb) steps.push(stairStep(fa, fb));
+  steps.push(...reverseSteps(legsFor(b)));
+  return steps;
+}
+
+/* ====================== stan ====================== */
+const state = {
+  wing: LS.get('wing136', null),
+  stepLen: LS.get('stepLen', 0.75),
+  route: [], idx: 0, dist: 0, stepsTaken: 0,
+  floor: 'parter', pedoOn: false,
+};
+
+/* ====================== rysowanie ====================== */
+const $ = id => document.getElementById(id);
+function showFloor(f){
+  state.floor = f;
+  FLOORS.forEach(x => { $('f_'+x).style.display = (x===f?'':'none'); });
+  document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.f===f));
+}
+function zoneEl(floor, code){
+  return document.getElementById(`z_${floor}_${code==='Z02'?'Z01':code}`);
+}
+function clearHighlights(){
+  document.querySelectorAll('svg .route path.on').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('svg .zone.mark').forEach(z => z.classList.remove('mark'));
+  document.querySelectorAll('svg .walker').forEach(w => w.style.display='none');
+}
+function cur(){ return state.route[state.idx] || null; }
+
+function render(){
+  clearHighlights();
+  const st = cur();
+  const total = state.route.reduce((s,x)=>s+x.len, 0);
+  if (!st){
+    $('steptext').textContent = 'Wybierz start i cel, aby wyznaczyć trasę.';
+    $('stepmeta').textContent = '';
+    $('stepbar').style.width = '0';
+  } else {
+    showFloor(st.floor);
+    st.overlays.forEach(id => { const p=$(id); if(p) p.classList.add('on'); });
+    st.marks.forEach(c => { const z=zoneEl(st.floor,c); if(z) z.classList.add('mark'); });
+    $('steptext').textContent = `${state.idx+1}. ${st.text}`;
+    const frac = st.len>0 ? Math.min(state.dist/st.len,1) : 0;
+    $('stepbar').style.width = (frac*100).toFixed(1)+'%';
+    $('stepmeta').textContent =
+      `Krok ${state.idx+1}/${state.route.length} · ${state.dist.toFixed(0)} m z ~${st.len} m` +
+      ` · cała trasa ~${total} m`;
+    updateDot();
+  }
+  $('btnPrev').disabled = !st || state.idx===0;
+  $('btnNext').disabled = !st || state.idx>=state.route.length-1;
+  $('sensline').textContent = state.pedoOn
+    ? `Krokomierz aktywny · kroki: ${state.stepsTaken} · krok = ${state.stepLen.toFixed(2)} m`
+    : `Krokomierz zatrzymany · kroki: ${state.stepsTaken}`;
+}
+function updateDot(){
+  const st = cur(); if(!st) return;
+  const pathId = st.overlays[0]; if(!pathId) return;
+  const path = $(pathId); if(!path || !path.getTotalLength) return;
+  const L = path.getTotalLength();
+  const frac = st.len>0 ? Math.min(state.dist/st.len, 1) : 0;
+  const pos = st.rev ? (1-frac)*L : frac*L;
+  const pt = path.getPointAtLength(pos);
+  const dot = $('walker_'+st.floor);
+  if (dot){ dot.setAttribute('cx', pt.x); dot.setAttribute('cy', pt.y); dot.style.display='block'; }
+}
+
+/* ====================== trasa / UI ====================== */
+function rebuildRoute(keepPos=false){
+  const a = $('selStart').value, b = $('selCel').value;
+  state.route = buildRoute(a,b);
+  if (!keepPos){ state.idx = 0; state.dist = 0; }
+  state.idx = Math.min(state.idx, Math.max(0, state.route.length-1));
+  LS.set('lastRoute', {start:a, cel:b});
+  render();
+}
+function gotoStep(i){
+  if (i<0 || i>=state.route.length) return;
+  state.idx = i; state.dist = 0; render();
+}
+function advance(meters){
+  const st = cur(); if(!st) { render(); return; }
+  state.dist += meters;
+  if (st.len>0 && state.dist >= st.len && state.idx < state.route.length-1){
+    const rest = state.dist - st.len;
+    state.idx++; state.dist = Math.max(0, rest);
+  }
+  render();
+}
+
+/* ====================== krokomierz ====================== */
+const pedo = {
+  g: {x:0,y:0,z:0}, last: 0, handler: null,
+  onStep(){
+    state.stepsTaken++;
+    advance(state.stepLen);
+  },
+  onMotion(e){
+    const a = e.accelerationIncludingGravity; if(!a || a.x===null) return;
+    const g = pedo.g, AL = 0.9;                 // filtr LP grawitacji
+    g.x = AL*g.x + (1-AL)*a.x;
+    g.y = AL*g.y + (1-AL)*a.y;
+    g.z = AL*g.z + (1-AL)*a.z;
+    const lx=a.x-g.x, ly=a.y-g.y, lz=a.z-g.z;
+    const mag = Math.sqrt(lx*lx+ly*ly+lz*lz);
+    const now = performance.now();
+    if (mag > 1.4 && now - pedo.last > 320){    // próg 1,4 m/s², refrakcja 320 ms
+      pedo.last = now; pedo.onStep();
+    }
+  },
+  async start(){
+    if (typeof DeviceMotionEvent !== 'undefined' &&
+        typeof DeviceMotionEvent.requestPermission === 'function'){
+      const st = await DeviceMotionEvent.requestPermission();  // iOS: HTTPS + gest
+      if (st !== 'granted'){ $('sensline').textContent = 'Brak zgody na czujniki ruchu.'; return false; }
+    }
+    pedo.handler = pedo.onMotion.bind(pedo);
+    window.addEventListener('devicemotion', pedo.handler);
+    return true;
+  },
+  stop(){
+    if (pedo.handler){ window.removeEventListener('devicemotion', pedo.handler); pedo.handler=null; }
+  }
+};
+
+/* ====================== Wake Lock (z fallbackiem) ====================== */
+const wake = {
+  lock: null,
+  async on(){
+    if (!('wakeLock' in navigator)){
+      $('wakebadge').textContent = 'Brak Wake Lock — ekran może zgasnąć; wydłuż autoblokadę.';
+      return;
+    }
+    try {
+      wake.lock = await navigator.wakeLock.request('screen');
+      $('wakebadge').textContent = 'Ekran nie zgaśnie 🔆';
+      wake.lock.addEventListener('release', () => {
+        wake.lock = null;
+        if (state.pedoOn) $('wakebadge').textContent = 'Wake Lock zwolniony';
+      });
+    } catch(e){
+      $('wakebadge').textContent = 'Wake Lock niedostępny: ' + e.name;
+    }
+  },
+  async off(){
+    if (wake.lock){ try{ await wake.lock.release(); }catch(e){} wake.lock=null; }
+    $('wakebadge').textContent = '';
+  }
+};
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState==='visible' && state.pedoOn && !wake.lock) wake.on();
 });
+
+/* ====================== init UI ====================== */
+function initSelects(){
+  const names = Object.keys(POIS);
+  for (const sel of [$('selStart'), $('selCel')]){
+    sel.innerHTML = names.map(n=>`<option>${n}</option>`).join('');
+    sel.addEventListener('change', ()=>rebuildRoute(false));
+  }
+  const last = LS.get('lastRoute', {start:'Recepcja', cel:'Pokój 136'});
+  if (names.includes(last.start)) $('selStart').value = last.start;
+  if (names.includes(last.cel))   $('selCel').value   = last.cel;
+}
+function initWings(){
+  const row = $('wingrow');
+  row.innerHTML = '<span style="font-size:.72rem;color:var(--muted);flex-basis:100%">Pokój 136 — skrzydło:</span>';
+  for (const [key,w] of Object.entries(WINGS)){
+    const b = document.createElement('button');
+    b.className = 'btn'; b.textContent = w.label;
+    b.style.borderColor = w.color;
+    b.dataset.w = key;
+    b.addEventListener('click', ()=>{
+      state.wing = (state.wing===key ? null : key);   // drugi klik odpina
+      LS.set('wing136', state.wing);
+      updateWingButtons();
+      rebuildRoute(true);
+    });
+    row.appendChild(b);
+  }
+  updateWingButtons();
+}
+function updateWingButtons(){
+  document.querySelectorAll('#wingrow .btn').forEach(b =>
+    b.classList.toggle('sel', b.dataset.w===state.wing));
+}
+$('btnPrev').addEventListener('click', ()=>gotoStep(state.idx-1));
+$('btnNext').addEventListener('click', ()=>gotoStep(state.idx+1));
+$('btnPedo').addEventListener('click', async ()=>{
+  if (!state.pedoOn){
+    const ok = await pedo.start();
+    if (!ok) return;
+    state.pedoOn = true;
+    $('btnPedo').textContent = 'Stop krokomierza';
+    $('btnPedo').classList.remove('acc'); $('btnPedo').classList.add('ok');
+    wake.on();
+  } else {
+    pedo.stop(); state.pedoOn = false;
+    $('btnPedo').textContent = 'Start krokomierza';
+    $('btnPedo').classList.add('acc'); $('btnPedo').classList.remove('ok');
+    wake.off();
+  }
+  render();
+});
+$('inpStep').value = state.stepLen;
+$('inpStep').addEventListener('change', ()=>{
+  const v = parseFloat($('inpStep').value);
+  if (v>=0.4 && v<=1.2){ state.stepLen = v; LS.set('stepLen', v); render(); }
+});
+document.querySelectorAll('#tabs button').forEach(b =>
+  b.addEventListener('click', ()=>{ showFloor(b.dataset.f); }));
+
+initSelects();
+initWings();
+rebuildRoute(false);
+showFloor(cur() ? cur().floor : 'parter');
+
+/* ====================== PWA ====================== */
+if ('serviceWorker' in navigator &&
+    (location.protocol==='https:' || location.hostname==='localhost')){
+  addEventListener('load', ()=>navigator.serviceWorker.register('sw.js'));
+}
 </script>
 </body>
 </html>

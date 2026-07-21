@@ -115,7 +115,7 @@
   <text class="zlabel" x="10" y="59">Z07</text><text class="rlabel" x="10" y="63">Bar</text>
   <text class="zlabel" x="30" y="85">Z03</text><text class="rlabel" x="30" y="89">Hol</text>
   <text class="rlabel" x="39" y="91">Recepcja Z04</text>
-  <text class="zlabel" x="54" y="82">Z01–Z02</text><text class="rlabel" x="54" y="85.5">Klatka</text>
+  <text class="zlabel" x="54" y="82">Z01–Z02</text><text class="rlabel" x="54" y="85.5">Schody</text>
   <text class="rlabel" x="44" y="109">▲ Wejście główne</text>
   <g class="route">
     <path id="p0_wejscie_recepcja"   d="M50 106 V96 L46 92"/>
@@ -154,14 +154,14 @@
   <text class="zlabel" x="25" y="13">Z13</text>
   <text class="zlabel" x="43" y="13">Z14</text>
   <text class="zlabel" x="61" y="13">Z15</text>
-  <text class="rlabel" x="24" y="6.8">Skrzydło północne</text>
+  <text class="rlabel" x="24" y="6.8">Pokoje — na wprost schodów</text>
   <text class="zlabel" x="85" y="33">Z16</text><text class="zlabel" x="85" y="57">Z17</text>
   <text class="zlabel" x="5.5" y="33">Z18</text><text class="zlabel" x="5.5" y="57">Z19</text>
   <text class="zlabel" x="9"  y="84">Z20</text><text class="zlabel" x="27" y="84">Z21</text>
   <text class="zlabel" x="31" y="39">Z22</text><text class="rlabel" x="31" y="43">Sala konf.</text>
   <text class="zlabel" x="53" y="39">Z23</text><text class="rlabel" x="53" y="43">Sala konf.</text>
-  <text class="rlabel" x="22" y="30.5">Pętla korytarza · Z24</text>
-  <text class="zlabel" x="54" y="82">Z01–Z02</text><text class="rlabel" x="54" y="85.5">Klatka</text>
+  <text class="rlabel" x="22" y="30.5">Główny korytarz (dookoła) · Z24</text>
+  <text class="zlabel" x="54" y="82">Z01–Z02</text><text class="rlabel" x="54" y="85.5">Schody</text>
   <g class="route">
     <path id="p1_stairs"    d="M60 88 V75"/>
     <path id="p1_loop_full" d="M60 75 H80 V25 H20 V75 Z"/>
@@ -202,7 +202,7 @@
   <text class="zlabel" x="10" y="51">Z29</text><text class="zlabel" x="32" y="51">Z30</text>
   <text class="zlabel" x="54" y="51">Z31</text><text class="zlabel" x="76" y="51">Z32</text>
   <text class="zlabel" x="10" y="84">Z33</text><text class="zlabel" x="32" y="84">Z34</text>
-  <text class="zlabel" x="54" y="82">Z01–Z02</text><text class="rlabel" x="54" y="85.5">Klatka</text>
+  <text class="zlabel" x="54" y="82">Z01–Z02</text><text class="rlabel" x="54" y="85.5">Schody</text>
   <text class="rlabel" x="8" y="41">Korytarz 2. piętra</text>
   <g class="route">
     <path id="p2_stairs"   d="M60 88 V74"/>
@@ -227,7 +227,7 @@
   <text class="zlabel" x="16" y="53">Z38</text><text class="zlabel" x="42" y="53">Z39</text>
   <text class="zlabel" x="68" y="53">Z40</text>
   <text class="zlabel" x="16" y="84">Z41</text>
-  <text class="zlabel" x="54" y="82">Z01–Z02</text><text class="rlabel" x="54" y="85.5">Klatka</text>
+  <text class="zlabel" x="54" y="82">Z01–Z02</text><text class="rlabel" x="54" y="85.5">Schody</text>
   <text class="rlabel" x="14" y="44">Poddasze — 3. piętro</text>
   <g class="route">
     <path id="p3_stairs"   d="M60 88 V74"/>
@@ -291,11 +291,12 @@ const FLOOR_LABEL = {parter:'parter', pietro1:'1. piętro', pietro2:'2. piętro'
 /* Skrzydła 1. piętra. Kolory = kolory na fizycznym planie ppoż. (placeholder
    do skalibrowania). arcS/arcL = krótszy/dłuższy łuk pętli od klatki Z01–Z02
    do wejścia w skrzydło, len w metrach (szacunek). */
+/* label/dir = jak to widać, stojąc na 1. piętrze plecami do schodów. */
 const WINGS = {
-  polnocne:   {label:'Północne',  color:'#1565c0', arcS:{id:'p1_arc_n_s',len:60}, arcL:{id:'p1_arc_n_l',len:72}, cor:{id:'p1_wing_n',len:7}, zones:['Z13','Z14','Z15']},
-  wschodnie:  {label:'Wschodnie', color:'#2e7d32', arcS:{id:'p1_arc_e_s',len:27}, arcL:{id:'p1_arc_e_l',len:105}, cor:{id:'p1_wing_e',len:6}, zones:['Z16','Z17']},
-  zachodnie:  {label:'Zachodnie', color:'#f9a825', arcS:{id:'p1_arc_w_s',len:39}, arcL:{id:'p1_arc_w_l',len:93}, cor:{id:'p1_wing_w',len:6}, zones:['Z18','Z19']},
-  poludniowe: {label:'Południowe',color:'#6a1b9a', arcS:{id:'p1_arc_s_s',len:20}, arcL:{id:'p1_arc_s_l',len:112}, cor:{id:'p1_wing_s',len:9}, zones:['Z20','Z21']},
+  polnocne:   {label:'Na wprost',      dir:'na wprost',            color:'#1565c0', arcS:{id:'p1_arc_n_s',len:60}, arcL:{id:'p1_arc_n_l',len:72}, cor:{id:'p1_wing_n',len:7}, zones:['Z13','Z14','Z15']},
+  wschodnie:  {label:'W prawo',        dir:'w prawo',              color:'#2e7d32', arcS:{id:'p1_arc_e_s',len:27}, arcL:{id:'p1_arc_e_l',len:105}, cor:{id:'p1_wing_e',len:6}, zones:['Z16','Z17']},
+  zachodnie:  {label:'W lewo, daleko', dir:'w lewo (do końca)',    color:'#f9a825', arcS:{id:'p1_arc_w_s',len:39}, arcL:{id:'p1_arc_w_l',len:93}, cor:{id:'p1_wing_w',len:6}, zones:['Z18','Z19']},
+  poludniowe: {label:'W lewo, blisko', dir:'w lewo (tuż obok)',    color:'#6a1b9a', arcS:{id:'p1_arc_s_s',len:20}, arcL:{id:'p1_arc_s_l',len:112}, cor:{id:'p1_wing_s',len:9}, zones:['Z20','Z21']},
 };
 
 /* Krok trasy. overlays = id ścieżek SVG (pierwsza prowadzi kropkę),
@@ -319,21 +320,21 @@ const POIS = {
 const LEGS = {
   'Recepcja': [
     S('parter', ['p0_recepcja_klatka'], ['Z04','Z03'],
-      'Od recepcji przejdź holem do klatki schodowej Z01–Z02.', false, 17, false,
-      'Wyjdź z klatki Z01–Z02 i przejdź holem do recepcji.')],
+      'Sprzed lady recepcji przejdź przez hol do głównych schodów.', false, 17, false,
+      'Zejdź z ostatniego stopnia i przejdź przez hol do lady recepcji.')],
   'Restauracja': [
     S('parter', ['p0_klatka_restauracja'], ['Z05'],
-      'Z restauracji idź korytarzem na zachód do klatki Z01–Z02.', false, 26, true,
-      'Idź korytarzem na wschód, wejście do restauracji (Z05) po prawej.')],
+      'Wyjdź z restauracji i idź korytarzem prosto do głównych schodów.', false, 26, true,
+      'Idź korytarzem prosto — wejście do restauracji będzie po prawej stronie.')],
   'Bar': [
     S('parter', ['p0_klatka_bar'], ['Z07'],
-      'Z baru idź korytarzem na wschód do klatki Z01–Z02.', false, 30, true,
-      'Idź korytarzem na zachód do baru (Z07).')],
+      'Wyjdź z baru i idź korytarzem prosto do głównych schodów.', false, 30, true,
+      'Idź korytarzem prosto do końca — wejście do baru przed Tobą.')],
   'Spa i basen': [
     S('parter', ['p0_klatka_spa'], ['Z09','Z10'],
-      'Ze spa wróć korytarzem na południe do klatki Z01–Z02.', false, 45, true,
-      'Idź korytarzem na północ, spa i basen (Z09–Z10) na końcu.')],
-  /* 'Pokój 136' budowany dynamicznie — zależy od przypiętego skrzydła. */
+      'Ze spa wróć długim korytarzem w stronę głównych schodów.', false, 45, true,
+      'Idź długim korytarzem przez cały budynek — spa i basen na jego końcu.')],
+  /* 'Pokój 136' budowany dynamicznie — zależy od zaznaczonego kierunku. */
 };
 
 function leg136(){ // kroki: pokój 136 → klatka Z01–Z02
@@ -341,18 +342,19 @@ function leg136(){ // kroki: pokój 136 → klatka Z01–Z02
   if (!w){
     return [S('pietro1', ['p1_loop_full'],
       ['Z13','Z14','Z15','Z16','Z17','Z18','Z19','Z20','Z21'],
-      'Nie wiem, w którym skrzydle jest pokój 136 — przypnij skrzydło powyżej, '+
-      'a poprowadzę krótszym łukiem pętli zamiast całej pętli.', true, 110)];
+      'Nie wiem, gdzie jest pokój 136. Zaznacz powyżej, w którą stronę '+
+      'idzie się do niego od schodów na 1. piętrze — wtedy poprowadzę '+
+      'najkrótszą drogą.', true, 110)];
   }
   return [
     S('pietro1', [w.cor.id], w.zones,
-      `Spod pokoju 136 dojdź korytarzem skrzydła (${w.label.toLowerCase()}) do pętli.`,
+      'Wyjdź z pokoju 136 i dojdź bocznym korytarzem do głównego korytarza.',
       false, w.cor.len, true,
-      `Korytarzem skrzydła (${w.label.toLowerCase()}) do pokoju 136.`),
+      'Skręć w boczny korytarz — pokój 136 jest na jego końcu.'),
     S('pietro1', [w.arcS.id], [],
-      `Krótszym łukiem pętli do klatki Z01–Z02 (ok. ${w.arcS.len} m).`,
+      `Idź głównym korytarzem w stronę schodów (ok. ${w.arcS.len} m).`,
       false, w.arcS.len, true,
-      `Z klatki Z01–Z02 idź krótszym łukiem pętli w stronę skrzydła ${w.label.toLowerCase()}go (ok. ${w.arcS.len} m).`),
+      `Na górze schodów ruszaj ${w.dir} głównym korytarzem (ok. ${w.arcS.len} m).`),
   ];
 }
 function legsFor(poi){ return poi==='Pokój 136' ? leg136() : (LEGS[poi]||[]); }
@@ -361,7 +363,7 @@ const STAIR_PATH = {parter:'p0_stairs', pietro1:'p1_stairs', pietro2:'p2_stairs'
 function stairStep(fromFloor, toFloor){
   const up = FLOORS.indexOf(toFloor) > FLOORS.indexOf(fromFloor);
   return S(toFloor, [STAIR_PATH[toFloor]], ['Z01','Z02'],
-    `Klatką schodową Z01–Z02 ${up?'wejdź na':'zejdź na'} ${FLOOR_LABEL[toFloor]}.`, false, 8);
+    `${up?'Wejdź':'Zejdź'} schodami na ${FLOOR_LABEL[toFloor]}.`, false, 8);
 }
 function buildRoute(a, b){
   if (!a || !b || a===b) return [];
@@ -662,8 +664,8 @@ function updateMapRotation(){
 }
 function shortHint(nxt){
   if (!nxt) return 'cel';
-  if (nxt.marks.includes('Z01')) return 'schody Z01–Z02';
-  if (nxt.wingPick) return 'pętla (przypnij skrzydło)';
+  if (nxt.marks.includes('Z01')) return 'schody';
+  if (nxt.wingPick) return 'główny korytarz (zaznacz kierunek do pokoju 136)';
   const jt = junctionTurn(cur(), nxt);
   if (jt) return `skręt w ${jt==='lewo'?'lewo':'prawo'}`;
   return 'prosto';
@@ -843,7 +845,7 @@ function initSelects(){
 }
 function initWings(){
   const row = $('wingrow');
-  row.innerHTML = '<span style="font-size:.72rem;color:var(--muted);flex-basis:100%">Pokój 136 — skrzydło:</span>';
+  row.innerHTML = '<span style="font-size:.72rem;color:var(--muted);flex-basis:100%">W którą stronę do pokoju 136, stojąc na górze schodów (1. piętro)?</span>';
   for (const [key,w] of Object.entries(WINGS)){
     const b = document.createElement('button');
     b.className = 'btn'; b.textContent = w.label;

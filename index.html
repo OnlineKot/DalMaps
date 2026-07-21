@@ -33,7 +33,7 @@
   .tabs button.on{background:var(--panel2);color:var(--txt);border-color:#5a6a7e}
 
   #mapwrap{flex:1;display:flex;align-items:center;justify-content:center;padding:0 .5rem}
-  svg{width:100%;max-width:480px;height:auto;display:block}
+  svg{width:100%;max-width:480px;height:auto;display:block;transition:transform .3s ease-out}
   svg .wall{fill:none;stroke:#6b7686;stroke-width:1}
   svg .zone{fill:#2c3440;stroke:#55606e;stroke-width:.4}
   svg .zone.wing{fill-opacity:.18;stroke-width:.6}
@@ -56,6 +56,10 @@
   .btn.acc{background:var(--accent);border-color:var(--accent);color:#fff}
   .btn.ok{background:var(--ok);border-color:var(--ok);color:#fff}
   .btn:disabled{opacity:.4}
+  #instr{display:flex;align-items:center;gap:.7rem;background:var(--panel2);
+    border:1px solid var(--line);border-radius:12px;padding:.5rem .7rem}
+  #instrArrow{font-size:1.9rem;line-height:1;transition:transform .25s;display:inline-block}
+  #instrText{font-size:1rem;font-weight:600;line-height:1.3}
   #steptext{font-size:.95rem;line-height:1.35;min-height:2.6em}
   #stepmeta{font-size:.75rem;color:var(--muted)}
   .bar{height:6px;border-radius:3px;background:var(--panel2);overflow:hidden}
@@ -122,6 +126,7 @@
     <path id="p0_stairs"             d="M60 88 V78"/>
   </g>
   <circle class="walker" id="walker_parter" r="1.8"/>
+  <polygon class="walker" id="head_parter" points="0,-4.4 1.9,-1.4 -1.9,-1.4" style="stroke:none;fill:var(--accent)"/>
 </svg>
 
 <svg id="f_pietro1" viewBox="0 0 100 114" style="display:none">
@@ -176,6 +181,7 @@
     <path id="p1_wing_s" d="M26 75 V90"/>
   </g>
   <circle class="walker" id="walker_pietro1" r="1.8"/>
+  <polygon class="walker" id="head_pietro1" points="0,-4.4 1.9,-1.4 -1.9,-1.4" style="stroke:none;fill:var(--accent)"/>
 </svg>
 
 <svg id="f_pietro2" viewBox="0 0 100 114" style="display:none">
@@ -203,6 +209,7 @@
     <path id="p2_korytarz" d="M60 74 H14 M60 74 H88"/>
   </g>
   <circle class="walker" id="walker_pietro2" r="1.8"/>
+  <polygon class="walker" id="head_pietro2" points="0,-4.4 1.9,-1.4 -1.9,-1.4" style="stroke:none;fill:var(--accent)"/>
 </svg>
 
 <svg id="f_pietro3" viewBox="0 0 100 114" style="display:none">
@@ -227,6 +234,7 @@
     <path id="p3_korytarz" d="M60 74 H16 M60 74 H86"/>
   </g>
   <circle class="walker" id="walker_pietro3" r="1.8"/>
+  <polygon class="walker" id="head_pietro3" points="0,-4.4 1.9,-1.4 -1.9,-1.4" style="stroke:none;fill:var(--accent)"/>
 </svg>
 </div>
 
@@ -237,6 +245,7 @@
     <select id="selCel"></select>
   </div>
   <div id="wingrow"></div>
+  <div id="instr"><span id="instrArrow">⬆</span><span id="instrText">Wybierz trasę i ruszaj.</span></div>
   <div id="steptext">Wybierz start i cel, aby wyznaczyć trasę.</div>
   <div class="bar"><div id="stepbar"></div></div>
   <div id="stepmeta"></div>
@@ -252,6 +261,13 @@
       <label style="flex:2">Długość kroku [m]</label>
       <input type="number" id="inpStep" min="0.4" max="1.2" step="0.01" style="flex:1">
     </div>
+    <div class="row">
+      <button class="btn" id="btnCal" style="flex:1">🧭 Kalibruj kompas — stań przodem w kierunku marszu i kliknij</button>
+    </div>
+    <div class="row">
+      <label style="flex:2"><input type="checkbox" id="chkRotate"> Obracaj mapę w kierunku marszu</label>
+    </div>
+    <div class="row"><span id="compassStatus">Kompas: nieaktywny</span></div>
   </details>
 </div>
 
@@ -353,9 +369,142 @@ function buildRoute(a, b){
 const state = {
   wing: LS.get('wing136', null),
   stepLen: LS.get('stepLen', 0.75),
+  rotateMap: LS.get('rotateMap', false),
   route: [], idx: 0, dist: 0, stepsTaken: 0,
   floor: 'parter', pedoOn: false,
 };
+
+/* ====================== geometria tras ====================== */
+/* Próbkuje ścieżkę SVG kroku, upraszcza do wierzchołków i wykrywa zakręty.
+   Wszystkie kąty w "stopniach mapy": 0 = góra planu, 90 = prawo, zgodnie
+   z ruchem wskazówek. */
+const geomCache = new Map();
+function angleDiff(a, b){ return ((a - b + 540) % 360) - 180; }
+function stepGeom(st){
+  if (!st.overlays[0]) return null;
+  const key = st.overlays[0] + (st.rev ? ':r' : '');
+  if (geomCache.has(key)) return geomCache.get(key);
+  const path = $(st.overlays[0]);
+  if (!path || !path.getTotalLength) return null;
+  const L = path.getTotalLength();
+  const n = Math.max(2, Math.ceil(L / 0.5));
+  let pts = [];
+  for (let i = 0; i <= n; i++){
+    const p = path.getPointAtLength(L * i / n);
+    pts.push({x: p.x, y: p.y});
+  }
+  if (st.rev) pts.reverse();
+  let d = 0; pts[0].d = 0;
+  for (let i = 1; i < pts.length; i++){
+    d += Math.hypot(pts[i].x - pts[i-1].x, pts[i].y - pts[i-1].y);
+    pts[i].d = d;
+  }
+  const bear = (a, b) => (Math.atan2(b.x - a.x, -(b.y - a.y)) * 180 / Math.PI + 360) % 360;
+  const verts = [pts[0]];
+  for (let i = 1; i < pts.length - 1; i++){
+    const a = verts[verts.length - 1], b = pts[i], c = pts[i + 1];
+    if (Math.abs(angleDiff(bear(b, c), bear(a, b))) > 25) verts.push(b);
+  }
+  verts.push(pts[pts.length - 1]);
+  const turns = [];
+  for (let i = 1; i < verts.length - 1; i++){
+    const a = verts[i-1], b = verts[i], c = verts[i+1];
+    const v1 = {x: b.x - a.x, y: b.y - a.y}, v2 = {x: c.x - b.x, y: c.y - b.y};
+    const cross = v1.x * v2.y - v1.y * v2.x;           // y w dół: cross>0 = w prawo
+    const dot = v1.x * v2.x + v1.y * v2.y;
+    const ang = Math.atan2(Math.abs(cross), dot) * 180 / Math.PI;
+    if (ang > 30) turns.push({d: b.d, dir: cross > 0 ? 'prawo' : 'lewo'});
+  }
+  const g = {units: d, verts, turns};
+  geomCache.set(key, g);
+  return g;
+}
+function bearingAt(st, distM){ // kierunek marszu w danym punkcie kroku
+  const g = stepGeom(st); if (!g || g.units === 0) return null;
+  const du = st.len > 0 ? Math.min(distM / st.len, 1) * g.units : 0;
+  for (let i = 1; i < g.verts.length; i++){
+    if (du <= g.verts[i].d + 1e-6 || i === g.verts.length - 1){
+      const a = g.verts[i-1], b = g.verts[i];
+      return (Math.atan2(b.x - a.x, -(b.y - a.y)) * 180 / Math.PI + 360) % 360;
+    }
+  }
+  return null;
+}
+function nextTurn(st, distM){ // najbliższy zakręt przed nami (w metrach)
+  const g = stepGeom(st); if (!g || g.units === 0 || !st.len) return null;
+  const du = (distM / st.len) * g.units;
+  for (const t of g.turns){
+    if (t.d > du + 0.5) return {dir: t.dir, m: (t.d - du) * (st.len / g.units)};
+  }
+  return null;
+}
+function junctionTurn(stA, stB){ // zakręt na styku dwóch kroków (to samo piętro)
+  if (!stA || !stB || stA.floor !== stB.floor) return null;
+  const b1 = bearingAt(stA, stA.len), b2 = bearingAt(stB, 0);
+  if (b1 === null || b2 === null) return null;
+  const d = angleDiff(b2, b1);
+  if (d > 35) return 'prawo';
+  if (d < -35) return 'lewo';
+  return null;
+}
+
+/* ====================== kompas ====================== */
+const compass = {
+  raw: null, offset: LS.get('compassOffset', null), active: false, handler: null,
+  async start(){ // wołane z gestu użytkownika (iOS wymaga zgody)
+    if (compass.handler) return true;
+    if (typeof DeviceOrientationEvent !== 'undefined' &&
+        typeof DeviceOrientationEvent.requestPermission === 'function'){
+      try {
+        const st = await DeviceOrientationEvent.requestPermission();
+        if (st !== 'granted') return false;
+      } catch(e){ return false; }
+    }
+    compass.handler = (e) => {
+      let h = null;
+      if (typeof e.webkitCompassHeading === 'number' && !isNaN(e.webkitCompassHeading)){
+        h = e.webkitCompassHeading;                    // iOS Safari
+      } else if (e.absolute && typeof e.alpha === 'number'){
+        h = (360 - e.alpha) % 360;                     // Android (absolute)
+      }
+      if (h !== null){ compass.raw = h; compass.active = true; onHeading(); }
+    };
+    window.addEventListener('deviceorientationabsolute', compass.handler);
+    window.addEventListener('deviceorientation', compass.handler);
+    return true;
+  },
+  mapHeading(){ // kierunek patrzenia w stopniach mapy (po kalibracji)
+    if (compass.raw === null || compass.offset === null) return null;
+    return (compass.raw + compass.offset + 360) % 360;
+  },
+  calibrate(){ // użytkownik stoi przodem w kierunku marszu bieżącego odcinka
+    const st = cur();
+    if (!st || compass.raw === null) return false;
+    const b = bearingAt(st, state.dist);
+    if (b === null) return false;
+    compass.offset = (b - compass.raw + 360) % 360;
+    LS.set('compassOffset', compass.offset);
+    return true;
+  }
+};
+let lastHeadTs = 0;
+function onHeading(){
+  const now = performance.now();
+  if (now - lastHeadTs < 100) return;   // ~10 Hz wystarczy
+  lastHeadTs = now;
+  updateInstruction();
+  updateHeadingDot();
+  updateMapRotation();
+  updateCompassStatus();
+}
+function updateCompassStatus(){
+  const el = $('compassStatus'); if (!el) return;
+  if (!compass.active || compass.raw === null){ el.textContent = 'Kompas: nieaktywny (uruchamia się ze startem krokomierza)'; return; }
+  const mh = compass.mapHeading();
+  el.textContent = mh === null
+    ? `Kompas: ${compass.raw.toFixed(0)}° — nieskalibrowany, użyj przycisku powyżej`
+    : `Kompas: ${compass.raw.toFixed(0)}° · kierunek na mapie: ${mh.toFixed(0)}°`;
+}
 
 /* ====================== rysowanie ====================== */
 const $ = id => document.getElementById(id);
@@ -399,6 +548,8 @@ function render(){
   $('sensline').textContent = state.pedoOn
     ? `Krokomierz aktywny · kroki: ${state.stepsTaken} · krok = ${state.stepLen.toFixed(2)} m`
     : `Krokomierz zatrzymany · kroki: ${state.stepsTaken}`;
+  updateInstruction();
+  updateCompassStatus();
 }
 function updateDot(){
   const st = cur(); if(!st) return;
@@ -410,6 +561,77 @@ function updateDot(){
   const pt = path.getPointAtLength(pos);
   const dot = $('walker_'+st.floor);
   if (dot){ dot.setAttribute('cx', pt.x); dot.setAttribute('cy', pt.y); dot.style.display='block'; }
+  updateHeadingDot();
+  updateMapRotation();
+}
+function updateHeadingDot(){
+  const st = cur();
+  FLOORS.forEach(f => { const t=$('head_'+f); if(t) t.style.display='none'; });
+  if (!st) return;
+  const mh = compass.mapHeading();
+  const tri = $('head_'+st.floor), dot = $('walker_'+st.floor);
+  if (mh===null || !tri || !dot || dot.style.display==='none') return;
+  const cx = parseFloat(dot.getAttribute('cx')||'0'), cy = parseFloat(dot.getAttribute('cy')||'0');
+  tri.setAttribute('transform', `translate(${cx} ${cy}) rotate(${mh})`);
+  tri.style.display='block';
+}
+function updateMapRotation(){
+  const mh = compass.mapHeading();
+  FLOORS.forEach(f => {
+    const svg = $('f_'+f);
+    if (!state.rotateMap || mh===null || f!==state.floor){ svg.style.transform='none'; return; }
+    const dot = $('walker_'+f);
+    let ox = 50, oy = 57;
+    if (dot && dot.style.display!=='none'){
+      ox = parseFloat(dot.getAttribute('cx')||'50');
+      oy = parseFloat(dot.getAttribute('cy')||'57');
+    }
+    svg.style.transformOrigin = `${ox}% ${(oy/114*100)}%`;
+    svg.style.transform = `rotate(${-mh}deg)`;
+  });
+}
+function shortHint(nxt){
+  if (!nxt) return 'cel';
+  if (nxt.marks.includes('Z01')) return 'schody Z01–Z02';
+  if (nxt.wingPick) return 'pętla (przypnij skrzydło)';
+  const jt = junctionTurn(cur(), nxt);
+  if (jt) return `skręt w ${jt==='lewo'?'lewo':'prawo'}`;
+  return 'prosto';
+}
+function updateInstruction(){
+  const st = cur();
+  const arrow = $('instrArrow'), txt = $('instrText');
+  if (!st){ arrow.style.transform='none'; arrow.textContent='⬆'; txt.textContent='Wybierz trasę i ruszaj.'; return; }
+  const t = nextTurn(st, state.dist);
+  let icon = '⬆', msg;
+  if (t){
+    icon = t.dir==='lewo' ? '⬅' : '➡';
+    msg = t.m < 3 ? `Skręć teraz w ${t.dir}` : `Za ok. ${Math.round(t.m)} m skręć w ${t.dir}`;
+  } else {
+    const rest = Math.max(0, (st.len||0) - state.dist);
+    const nxt = state.route[state.idx+1];
+    if (!nxt && rest < 3){ icon='🎯'; msg='Jesteś u celu'; }
+    else if (!nxt) msg = `Prosto jeszcze ok. ${Math.round(rest)} m — cel przed Tobą`;
+    else {
+      const hint = shortHint(nxt);
+      const jt = junctionTurn(st, nxt);
+      if (jt) icon = jt==='lewo' ? '⬅' : '➡';
+      msg = `Prosto ok. ${Math.round(rest)} m, potem: ${hint}`;
+    }
+  }
+  const mh = compass.mapHeading(), b = bearingAt(st, state.dist);
+  if (mh!==null && b!==null){
+    // strzałka pokazuje, w którą stronę masz iść względem tego, gdzie patrzysz
+    arrow.textContent = '⬆';
+    arrow.style.transform = `rotate(${angleDiff(b, mh)}deg)`;
+    const off = Math.abs(angleDiff(b, mh));
+    if (off > 130) msg = 'Zawróć! ' + msg;
+    else if (off > 60) msg = `Obróć się w ${angleDiff(b,mh)>0?'prawo':'lewo'}. ` + msg;
+  } else {
+    arrow.style.transform='none';
+    arrow.textContent = icon;
+  }
+  txt.textContent = msg;
 }
 
 /* ====================== trasa / UI ====================== */
@@ -428,7 +650,13 @@ function gotoStep(i){
 function advance(meters){
   const st = cur(); if(!st) { render(); return; }
   state.dist += meters;
-  if (st.len>0 && state.dist >= st.len && state.idx < state.route.length-1){
+  if (state.dist < 0){                                  // marsz w tył — cofnij
+    if (state.idx > 0){
+      state.idx--;
+      const prev = cur();
+      state.dist = Math.max(0, (prev.len||0) + state.dist);
+    } else state.dist = 0;
+  } else if (st.len>0 && state.dist >= st.len && state.idx < state.route.length-1){
     const rest = state.dist - st.len;
     state.idx++; state.dist = Math.max(0, rest);
   }
@@ -440,7 +668,18 @@ const pedo = {
   g: {x:0,y:0,z:0}, last: 0, handler: null,
   onStep(){
     state.stepsTaken++;
-    advance(state.stepLen);
+    const st = cur(), mh = compass.mapHeading();
+    if (st && mh !== null){
+      const b = bearingAt(st, state.dist);
+      if (b !== null){
+        const off = Math.abs(angleDiff(mh, b));
+        if (off <= 75) advance(state.stepLen);          // idziesz zgodnie z trasą
+        else if (off >= 105) advance(-state.stepLen);   // idziesz w przeciwną stronę
+        else render();                                  // bokiem — bez postępu
+        return;
+      }
+    }
+    advance(state.stepLen);                             // brak kompasu: jak dotąd
   },
   onMotion(e){
     const a = e.accelerationIncludingGravity; if(!a || a.x===null) return;
@@ -537,6 +776,7 @@ $('btnPedo').addEventListener('click', async ()=>{
   if (!state.pedoOn){
     const ok = await pedo.start();
     if (!ok) return;
+    await compass.start();          // ten sam gest użytkownika starcza dla obu zgód
     state.pedoOn = true;
     $('btnPedo').textContent = 'Stop krokomierza';
     $('btnPedo').classList.remove('acc'); $('btnPedo').classList.add('ok');
@@ -548,6 +788,22 @@ $('btnPedo').addEventListener('click', async ()=>{
     wake.off();
   }
   render();
+});
+$('btnCal').addEventListener('click', async ()=>{
+  if (!compass.active) await compass.start();
+  setTimeout(()=>{                 // daj kompasowi chwilę na pierwszy odczyt
+    const ok = compass.calibrate();
+    $('compassStatus').textContent = ok
+      ? `Skalibrowano ✓ (offset ${compass.offset.toFixed(0)}°)`
+      : 'Kalibracja nieudana — wyznacz trasę i sprawdź, czy kompas ma odczyt.';
+    render();
+  }, 350);
+});
+$('chkRotate').checked = state.rotateMap;
+$('chkRotate').addEventListener('change', ()=>{
+  state.rotateMap = $('chkRotate').checked;
+  LS.set('rotateMap', state.rotateMap);
+  updateMapRotation();
 });
 $('inpStep').value = state.stepLen;
 $('inpStep').addEventListener('change', ()=>{

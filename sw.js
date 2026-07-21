@@ -1,9 +1,11 @@
 /* DalMaps — service worker, strategia cache-first (offline w hotelu). */
-const CACHE = 'dalmaps-v7';
+const CACHE = 'dalmaps-v8';
 const ASSETS = [
   './',
   './index.html',
   './manifest.webmanifest',
+  './vendor/leaflet.js',
+  './vendor/leaflet.css',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/apple-touch-icon.png',

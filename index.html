@@ -9,6 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="DalMaps">
 <title>DalMaps — Dalmahoy nawigator</title>
 <link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="vendor/leaflet.css">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <style>
@@ -32,10 +33,10 @@
     background:var(--panel);color:var(--muted);font-size:.85rem}
   .tabs button.on{background:var(--panel2);color:var(--txt);border-color:#5a6a7e}
 
-  #mapwrap{flex:1;display:flex;align-items:center;justify-content:center;padding:0 .5rem}
-  svg{width:100%;max-width:480px;height:auto;display:block;transition:transform .3s ease-out}
   /* stylistyka jak w mapach online: jasna mapa, niebieska trasa piesza */
-  svg{border-radius:14px}
+  #map{flex:1;min-height:320px;margin:0 .5rem;border-radius:14px;background:#cde5c8;z-index:0}
+  #svgstore{display:none}
+  .leaflet-container{font:inherit}
   svg .wall{fill:#ffffff;stroke:#c9ced6;stroke-width:1}
   svg .zone{fill:#f1f3f4;stroke:#dadce0;stroke-width:.4}
   svg .zone.wing{fill-opacity:.22;stroke-width:.6}
@@ -92,7 +93,8 @@
   <button data-f="pietro3">3. piętro</button>
 </div>
 
-<div id="mapwrap">
+<div id="map"></div>
+<div id="svgstore">
 
 <!-- Bryła wg publicznych informacji o Dalmahoy: dwór (1725) z wykuszami,
      łącznik z wejściem i recepcją, długie nowe skrzydło pokojowe (L),
@@ -167,7 +169,7 @@
   <polygon class="walker" id="head_parter" points="0,-7.5 4.6,-2 -4.6,-2" style="stroke:none;fill:#4285f4;opacity:.35"/>
 </svg>
 
-<svg id="f_pietro1" viewBox="0 0 100 114" style="display:none">
+<svg id="f_pietro1" viewBox="0 0 100 114">
   <rect x="0" y="0" width="100" height="114" fill="#cde5c8" rx="3"/>
   <circle cx="12" cy="104" r="3.4" fill="#b3d8a8"/><circle cx="70" cy="110" r="3" fill="#b3d8a8"/>
   <circle cx="96" cy="44" r="3" fill="#b3d8a8"/><circle cx="48" cy="14" r="3.2" fill="#b3d8a8"/>
@@ -239,7 +241,7 @@
   <polygon class="walker" id="head_pietro1" points="0,-7.5 4.6,-2 -4.6,-2" style="stroke:none;fill:#4285f4;opacity:.35"/>
 </svg>
 
-<svg id="f_pietro2" viewBox="0 0 100 114" style="display:none">
+<svg id="f_pietro2" viewBox="0 0 100 114">
   <rect x="0" y="0" width="100" height="114" fill="#cde5c8" rx="3"/>
   <circle cx="12" cy="104" r="3.4" fill="#b3d8a8"/><circle cx="96" cy="44" r="3" fill="#b3d8a8"/>
   <g opacity=".85"><polygon points="93,12 95.4,17 93,15.8 90.6,17" fill="#5f6368"/><text class="rlabel" x="91.8" y="10.6">N</text></g>
@@ -278,7 +280,7 @@
   <polygon class="walker" id="head_pietro2" points="0,-7.5 4.6,-2 -4.6,-2" style="stroke:none;fill:#4285f4;opacity:.35"/>
 </svg>
 
-<svg id="f_pietro3" viewBox="0 0 100 114" style="display:none">
+<svg id="f_pietro3" viewBox="0 0 100 114">
   <rect x="0" y="0" width="100" height="114" fill="#cde5c8" rx="3"/>
   <circle cx="12" cy="104" r="3.4" fill="#b3d8a8"/><circle cx="96" cy="44" r="3" fill="#b3d8a8"/>
   <g opacity=".85"><polygon points="93,12 95.4,17 93,15.8 90.6,17" fill="#5f6368"/><text class="rlabel" x="91.8" y="10.6">N</text></g>
@@ -352,9 +354,6 @@
       <button class="btn" id="btnCal" style="flex:1">🧭 Kalibruj kompas — stań przodem w kierunku marszu i kliknij</button>
     </div>
     <div class="row">
-      <label style="flex:2"><input type="checkbox" id="chkRotate"> Obracaj mapę w kierunku marszu</label>
-    </div>
-    <div class="row">
       <label style="flex:2"><input type="checkbox" id="chkLearn"> Ucz się długości kroku z marszu</label>
     </div>
     <div class="row">
@@ -365,6 +364,7 @@
   </details>
 </div>
 
+<script src="vendor/leaflet.js"></script>
 <script>
 'use strict';
 /* ====================== stałe / localStorage ====================== */
@@ -655,7 +655,6 @@ function onHeading(){
   lastHeadTs = now;
   updateInstruction();
   updateHeadingDot();
-  updateMapRotation();
   updateCompassStatus();
 }
 function updateCompassStatus(){
@@ -669,9 +668,31 @@ function updateCompassStatus(){
 
 /* ====================== rysowanie ====================== */
 const $ = id => document.getElementById(id);
+
+/* Leaflet (CRS.Simple): plan budynku jak mapa online — pinch-zoom,
+   przesuwanie palcem, płynne podążanie kamery za pozycją. */
+const MAP_BOUNDS = L.latLngBounds([[0,0],[114,100]]);
+const lmap = L.map('map', {
+  crs: L.CRS.Simple, attributionControl: false,
+  zoomSnap: .25, zoomDelta: .5, minZoom: 1, maxZoom: 6,
+  maxBoundsViscosity: .8,
+});
+lmap.setMaxBounds(MAP_BOUNDS.pad(.25));
+const ll = (x, y) => [114 - y, x];          // wsp. SVG -> wsp. mapy
+const floorOverlays = {};
+FLOORS.forEach(f => {
+  floorOverlays[f] = L.svgOverlay($('f_'+f), MAP_BOUNDS, {interactive: false});
+});
+let mapFitted = false;
+addEventListener('resize', () => lmap.invalidateSize());
+
 function showFloor(f){
   state.floor = f;
-  FLOORS.forEach(x => { $('f_'+x).style.display = (x===f?'':'none'); });
+  FLOORS.forEach(x => {
+    if (x !== f && lmap.hasLayer(floorOverlays[x])) lmap.removeLayer(floorOverlays[x]);
+  });
+  if (!lmap.hasLayer(floorOverlays[f])) lmap.addLayer(floorOverlays[f]);
+  if (!mapFitted){ lmap.fitBounds(MAP_BOUNDS); mapFitted = true; }
   document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.f===f));
 }
 function zoneEl(floor, code){
@@ -726,7 +747,8 @@ function updateDot(){
   const dot = $('walker_'+st.floor);
   if (dot){ dot.setAttribute('cx', pt.x); dot.setAttribute('cy', pt.y); dot.style.display='block'; }
   updateHeadingDot();
-  updateMapRotation();
+  if (state.pedoOn)                          // kamera podąża za pozycją jak w nawigacji
+    lmap.setView(ll(pt.x, pt.y), Math.max(lmap.getZoom(), 3), {animate: true});
 }
 function updateHeadingDot(){
   const st = cur();
@@ -738,21 +760,6 @@ function updateHeadingDot(){
   const cx = parseFloat(dot.getAttribute('cx')||'0'), cy = parseFloat(dot.getAttribute('cy')||'0');
   tri.setAttribute('transform', `translate(${cx} ${cy}) rotate(${mh})`);
   tri.style.display='block';
-}
-function updateMapRotation(){
-  const mh = compass.mapHeading();
-  FLOORS.forEach(f => {
-    const svg = $('f_'+f);
-    if (!state.rotateMap || mh===null || f!==state.floor){ svg.style.transform='none'; return; }
-    const dot = $('walker_'+f);
-    let ox = 50, oy = 57;
-    if (dot && dot.style.display!=='none'){
-      ox = parseFloat(dot.getAttribute('cx')||'50');
-      oy = parseFloat(dot.getAttribute('cy')||'57');
-    }
-    svg.style.transformOrigin = `${ox}% ${(oy/114*100)}%`;
-    svg.style.transform = `rotate(${-mh}deg)`;
-  });
 }
 function shortHint(nxt){
   if (!nxt) return 'cel';
@@ -1053,12 +1060,6 @@ $('chkLearn').addEventListener('change', ()=>{
 });
 $('btnExport').addEventListener('click', async ()=>{
   $('exportStatus').textContent = await walklog.export();
-});
-$('chkRotate').checked = state.rotateMap;
-$('chkRotate').addEventListener('change', ()=>{
-  state.rotateMap = $('chkRotate').checked;
-  LS.set('rotateMap', state.rotateMap);
-  updateMapRotation();
 });
 $('inpStep').value = state.stepLen;
 $('inpStep').addEventListener('change', ()=>{

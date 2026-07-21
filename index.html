@@ -34,17 +34,20 @@
 
   #mapwrap{flex:1;display:flex;align-items:center;justify-content:center;padding:0 .5rem}
   svg{width:100%;max-width:480px;height:auto;display:block;transition:transform .3s ease-out}
-  svg .wall{fill:#1d232d;stroke:#8a94a4;stroke-width:1.2}
-  svg .zone{fill:#2c3440;stroke:#55606e;stroke-width:.4}
-  svg .zone.wing{fill-opacity:.18;stroke-width:.6}
-  svg .zone.mark{stroke:var(--accent);stroke-width:.9;fill-opacity:.4}
-  svg .zlabel{font-size:3.1px;fill:#cfd8e3;font-weight:600}
-  svg .rlabel{font-size:2.5px;fill:#8d99a8}
-  svg .route path{fill:none;stroke:transparent;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
-  svg .route path.on{stroke:var(--accent);stroke-dasharray:3 2.2;animation:dash 1.2s linear infinite}
-  @keyframes dash{to{stroke-dashoffset:-5.2}}
-  svg .walker{fill:#fff;stroke:var(--accent);stroke-width:.9;display:none}
-  svg .stairs{fill:#38445466;stroke:#6b7686;stroke-width:.5}
+  /* stylistyka jak w mapach online: jasna mapa, niebieska trasa piesza */
+  svg{border-radius:14px}
+  svg .wall{fill:#ffffff;stroke:#c9ced6;stroke-width:1}
+  svg .zone{fill:#f1f3f4;stroke:#dadce0;stroke-width:.4}
+  svg .zone.wing{fill-opacity:.22;stroke-width:.6}
+  svg .zone.mark{stroke:#ea4335;stroke-width:.9;fill-opacity:.5}
+  svg .zlabel{font-size:2px;fill:#9aa0a6;font-weight:600}
+  svg .rlabel{font-size:2.6px;fill:#3c4043;font-weight:600}
+  svg .poi{font-size:4px}
+  svg .route path{fill:none;stroke:transparent;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  svg .route path.on{stroke:#4285f4;stroke-dasharray:.1 3.2;animation:dash 1.2s linear infinite}
+  @keyframes dash{to{stroke-dashoffset:-6.6}}
+  svg .walker{fill:#4285f4;stroke:#fff;stroke-width:1;display:none}
+  svg .stairs{fill:#e8eaed;stroke:#b9c0c9;stroke-width:.5}
 
   #panel{background:var(--panel);border-top:1px solid var(--line);
     padding:.6rem .9rem .8rem;display:flex;flex-direction:column;gap:.55rem}
@@ -97,14 +100,14 @@
      go tryb pomiaru trasy. Kody Z01–Z41 z planu ppoż. -->
 
 <svg id="f_parter" viewBox="0 0 100 114">
-  <rect x="0" y="0" width="100" height="114" fill="#131a12"/>
-  <path d="M24 114 Q30 96 40 84 L45 78" stroke="#3d434c" stroke-width="7" fill="none" stroke-linecap="round" opacity=".8"/>
-  <ellipse cx="30" cy="103" rx="7" ry="4" fill="#2a2f37"/>
-  <circle cx="12" cy="104" r="3.4" fill="#1c2a17"/><circle cx="70" cy="110" r="3" fill="#1c2a17"/>
-  <circle cx="96" cy="44" r="3" fill="#1c2a17"/><circle cx="96" cy="90" r="2.6" fill="#1c2a17"/>
-  <circle cx="48" cy="14" r="3.2" fill="#1c2a17"/><circle cx="56" cy="30" r="2.6" fill="#1c2a17"/>
-  <g opacity=".85"><polygon points="93,12 95.4,17 93,15.8 90.6,17" fill="#cfd8e3"/><text class="rlabel" x="91.8" y="10.6">N</text></g>
-  <line x1="6" y1="110" x2="22.7" y2="110" stroke="#cfd8e3" stroke-width=".7"/><text class="rlabel" x="6" y="108.4">10 m</text>
+  <rect x="0" y="0" width="100" height="114" fill="#cde5c8" rx="3"/>
+  <path d="M24 114 Q30 96 40 84 L45 78" stroke="#ffffff" stroke-width="7" fill="none" stroke-linecap="round" opacity=".8"/>
+  <ellipse cx="30" cy="103" rx="7" ry="4" fill="#e8eaed"/>
+  <circle cx="12" cy="104" r="3.4" fill="#b3d8a8"/><circle cx="70" cy="110" r="3" fill="#b3d8a8"/>
+  <circle cx="96" cy="44" r="3" fill="#b3d8a8"/><circle cx="96" cy="90" r="2.6" fill="#b3d8a8"/>
+  <circle cx="48" cy="14" r="3.2" fill="#b3d8a8"/><circle cx="56" cy="30" r="2.6" fill="#b3d8a8"/>
+  <g opacity=".85"><polygon points="93,12 95.4,17 93,15.8 90.6,17" fill="#5f6368"/><text class="rlabel" x="91.8" y="10.6">N</text></g>
+  <line x1="6" y1="110" x2="22.7" y2="110" stroke="#5f6368" stroke-width=".7"/><text class="rlabel" x="6" y="108.4">10 m</text>
   <!-- bryła: dwór (1725) + łącznik z wejściem + nowe skrzydło (L) + leisure club -->
   <g>
     <rect class="wall" x="52" y="62" width="40" height="40"/>
@@ -117,19 +120,19 @@
     <rect class="wall" x="4" y="28" width="20" height="46"/>
     <rect class="wall" x="4" y="8" width="36" height="20"/>
   </g>
-  <rect x="41" y="64" width="10" height="6" fill="none" stroke="#8a94a4" stroke-width=".5" stroke-dasharray="1.5 1"/>
+  <rect x="41" y="64" width="10" height="6" fill="none" stroke="#9aa4ae" stroke-width=".5" stroke-dasharray="1.5 1"/>
   <text class="rlabel" x="26" y="62.5">▲ Wejście główne</text>
   <text class="rlabel" x="63" y="66.5">Dwór (1725)</text>
   <text class="rlabel" x="6" y="72.2">Nowe skrzydło</text>
-  <rect class="zone" id="z_parter_Z03" x="41" y="71" width="10" height="22"/>
+  <rect class="zone" id="z_parter_Z03" x="41" y="71" width="10" height="22" style="fill:#fdf3d8;stroke:#e8d49a"/>
   <rect class="zone" id="z_parter_Z04" x="42" y="76" width="8" height="6"/>
-  <rect class="zone" id="z_parter_Z05" x="81" y="63" width="10" height="24"/>
+  <rect class="zone" id="z_parter_Z05" x="81" y="63" width="10" height="24" style="fill:#fbe7cf;stroke:#edc79b"/>
   <rect class="zone" id="z_parter_Z06" x="57" y="53" width="26" height="8"/>
-  <rect class="zone" id="z_parter_Z07" x="53" y="92" width="26" height="9"/>
+  <rect class="zone" id="z_parter_Z07" x="53" y="92" width="26" height="9" style="fill:#fbe7cf;stroke:#edc79b"/>
   <rect class="zone" id="z_parter_Z08" x="53" y="63" width="9" height="26"/>
-  <rect class="zone" id="z_parter_Z09" x="26" y="9" width="13" height="18"/>
-  <rect class="zone" id="z_parter_Z10" x="6" y="10" width="18" height="16" style="fill:#123a52;stroke:#2e6d99"/>
-  <path d="M8 15 q2 -1.4 4 0 t4 0 t4 0 M8 20 q2 -1.4 4 0 t4 0 t4 0" stroke="#2e6d99" stroke-width=".5" fill="none"/>
+  <rect class="zone" id="z_parter_Z09" x="26" y="9" width="13" height="18" style="fill:#d7ead9;stroke:#a8cbad"/>
+  <rect class="zone" id="z_parter_Z10" x="6" y="10" width="18" height="16" style="fill:#a6d5f5;stroke:#5ba3d9"/>
+  <path d="M8 15 q2 -1.4 4 0 t4 0 t4 0 M8 20 q2 -1.4 4 0 t4 0 t4 0" stroke="#5ba3d9" stroke-width=".5" fill="none"/>
   <rect class="zone" id="z_parter_Z11" x="26" y="86" width="8" height="7"/>
   <rect class="zone" id="z_parter_Z12" x="6" y="32" width="16" height="38"/>
   <rect class="stairs zone" id="z_parter_Z01" x="64" y="72" width="16" height="18"/>
@@ -145,6 +148,13 @@
   <text class="rlabel" x="7" y="43">i zaplecze</text>
   <text class="zlabel" x="65" y="76">Z01–Z02</text><text class="rlabel" x="65" y="79.4">Schody</text>
   <text class="rlabel" x="6" y="24.4">Leisure Club</text>
+  <text class="poi" x="83" y="82">🍽️</text>
+  <text class="poi" x="63" y="99.8">🍸</text>
+  <text class="poi" x="12" y="22">🏊</text>
+  <text class="poi" x="30" y="22">💪</text>
+  <text class="poi" x="42.5" y="90.5">🛎</text>
+  <text class="poi" x="27.5" y="92.2" style="font-size:3px">🚻</text>
+  <text class="poi" x="68.5" y="88">🪜</text>
   <g class="route">
     <path id="p0_wejscie_recepcja" d="M46 66 V76"/>
     <path id="p0_recepcja_klatka" d="M46 80 H64"/>
@@ -153,16 +163,16 @@
     <path id="p0_klatka_spa" d="M64 81 H48 V84 H14 V26"/>
     <path id="p0_stairs" d="M72 88 V78"/>
   </g>
-  <circle class="walker" id="walker_parter" r="1.8"/>
-  <polygon class="walker" id="head_parter" points="0,-4.4 1.9,-1.4 -1.9,-1.4" style="stroke:none;fill:var(--accent)"/>
+  <circle class="walker" id="walker_parter" r="2.2"/>
+  <polygon class="walker" id="head_parter" points="0,-7.5 4.6,-2 -4.6,-2" style="stroke:none;fill:#4285f4;opacity:.35"/>
 </svg>
 
 <svg id="f_pietro1" viewBox="0 0 100 114" style="display:none">
-  <rect x="0" y="0" width="100" height="114" fill="#131a12"/>
-  <circle cx="12" cy="104" r="3.4" fill="#1c2a17"/><circle cx="70" cy="110" r="3" fill="#1c2a17"/>
-  <circle cx="96" cy="44" r="3" fill="#1c2a17"/><circle cx="48" cy="14" r="3.2" fill="#1c2a17"/>
-  <g opacity=".85"><polygon points="93,12 95.4,17 93,15.8 90.6,17" fill="#cfd8e3"/><text class="rlabel" x="91.8" y="10.6">N</text></g>
-  <line x1="6" y1="110" x2="22.7" y2="110" stroke="#cfd8e3" stroke-width=".7"/><text class="rlabel" x="6" y="108.4">10 m</text>
+  <rect x="0" y="0" width="100" height="114" fill="#cde5c8" rx="3"/>
+  <circle cx="12" cy="104" r="3.4" fill="#b3d8a8"/><circle cx="70" cy="110" r="3" fill="#b3d8a8"/>
+  <circle cx="96" cy="44" r="3" fill="#b3d8a8"/><circle cx="48" cy="14" r="3.2" fill="#b3d8a8"/>
+  <g opacity=".85"><polygon points="93,12 95.4,17 93,15.8 90.6,17" fill="#5f6368"/><text class="rlabel" x="91.8" y="10.6">N</text></g>
+  <line x1="6" y1="110" x2="22.7" y2="110" stroke="#5f6368" stroke-width=".7"/><text class="rlabel" x="6" y="108.4">10 m</text>
   <g>
     <rect class="wall" x="52" y="62" width="40" height="40"/>
     <rect class="wall" x="56" y="52" width="28" height="10"/>
@@ -207,6 +217,8 @@
   <text class="zlabel" x="42" y="74.6">Z22</text><text class="zlabel" x="42" y="86.6">Z23</text>
   <text class="rlabel" x="53" y="90.8">Główny korytarz · Z24</text>
   <text class="zlabel" x="65" y="76">Z01–Z02</text><text class="rlabel" x="65" y="79.4">Schody</text>
+  <text class="poi" x="12" y="91.5">🛏️</text>
+  <text class="poi" x="68.5" y="88">🪜</text>
   <g class="route">
     <path id="p1_stairs" d="M76 84 V92"/>
     <path id="p1_loop_full" d="M76 92 H86 V66 H58 V92 Z"/>
@@ -223,15 +235,15 @@
     <path id="p1_wing_w" d="M58 79 H48 V84 H10"/>
     <path id="p1_wing_s" d="M62 92 V98"/>
   </g>
-  <circle class="walker" id="walker_pietro1" r="1.8"/>
-  <polygon class="walker" id="head_pietro1" points="0,-4.4 1.9,-1.4 -1.9,-1.4" style="stroke:none;fill:var(--accent)"/>
+  <circle class="walker" id="walker_pietro1" r="2.2"/>
+  <polygon class="walker" id="head_pietro1" points="0,-7.5 4.6,-2 -4.6,-2" style="stroke:none;fill:#4285f4;opacity:.35"/>
 </svg>
 
 <svg id="f_pietro2" viewBox="0 0 100 114" style="display:none">
-  <rect x="0" y="0" width="100" height="114" fill="#131a12"/>
-  <circle cx="12" cy="104" r="3.4" fill="#1c2a17"/><circle cx="96" cy="44" r="3" fill="#1c2a17"/>
-  <g opacity=".85"><polygon points="93,12 95.4,17 93,15.8 90.6,17" fill="#cfd8e3"/><text class="rlabel" x="91.8" y="10.6">N</text></g>
-  <line x1="6" y1="110" x2="22.7" y2="110" stroke="#cfd8e3" stroke-width=".7"/><text class="rlabel" x="6" y="108.4">10 m</text>
+  <rect x="0" y="0" width="100" height="114" fill="#cde5c8" rx="3"/>
+  <circle cx="12" cy="104" r="3.4" fill="#b3d8a8"/><circle cx="96" cy="44" r="3" fill="#b3d8a8"/>
+  <g opacity=".85"><polygon points="93,12 95.4,17 93,15.8 90.6,17" fill="#5f6368"/><text class="rlabel" x="91.8" y="10.6">N</text></g>
+  <line x1="6" y1="110" x2="22.7" y2="110" stroke="#5f6368" stroke-width=".7"/><text class="rlabel" x="6" y="108.4">10 m</text>
   <g>
     <rect class="wall" x="52" y="62" width="40" height="40"/>
     <rect class="wall" x="56" y="52" width="28" height="10"/>
@@ -262,15 +274,15 @@
     <path id="p2_stairs" d="M76 84 V92"/>
     <path id="p2_korytarz" d="M76 92 H58 V79 H48 V84 H10"/>
   </g>
-  <circle class="walker" id="walker_pietro2" r="1.8"/>
-  <polygon class="walker" id="head_pietro2" points="0,-4.4 1.9,-1.4 -1.9,-1.4" style="stroke:none;fill:var(--accent)"/>
+  <circle class="walker" id="walker_pietro2" r="2.2"/>
+  <polygon class="walker" id="head_pietro2" points="0,-7.5 4.6,-2 -4.6,-2" style="stroke:none;fill:#4285f4;opacity:.35"/>
 </svg>
 
 <svg id="f_pietro3" viewBox="0 0 100 114" style="display:none">
-  <rect x="0" y="0" width="100" height="114" fill="#131a12"/>
-  <circle cx="12" cy="104" r="3.4" fill="#1c2a17"/><circle cx="96" cy="44" r="3" fill="#1c2a17"/>
-  <g opacity=".85"><polygon points="93,12 95.4,17 93,15.8 90.6,17" fill="#cfd8e3"/><text class="rlabel" x="91.8" y="10.6">N</text></g>
-  <line x1="6" y1="110" x2="22.7" y2="110" stroke="#cfd8e3" stroke-width=".7"/><text class="rlabel" x="6" y="108.4">10 m</text>
+  <rect x="0" y="0" width="100" height="114" fill="#cde5c8" rx="3"/>
+  <circle cx="12" cy="104" r="3.4" fill="#b3d8a8"/><circle cx="96" cy="44" r="3" fill="#b3d8a8"/>
+  <g opacity=".85"><polygon points="93,12 95.4,17 93,15.8 90.6,17" fill="#5f6368"/><text class="rlabel" x="91.8" y="10.6">N</text></g>
+  <line x1="6" y1="110" x2="22.7" y2="110" stroke="#5f6368" stroke-width=".7"/><text class="rlabel" x="6" y="108.4">10 m</text>
   <g>
     <rect class="wall" x="52" y="62" width="40" height="40"/>
     <rect class="wall" x="40" y="70" width="12" height="24"/>
@@ -296,8 +308,8 @@
     <path id="p3_stairs" d="M76 84 V92"/>
     <path id="p3_korytarz" d="M76 92 H58 V79 H48 V84 H10"/>
   </g>
-  <circle class="walker" id="walker_pietro3" r="1.8"/>
-  <polygon class="walker" id="head_pietro3" points="0,-4.4 1.9,-1.4 -1.9,-1.4" style="stroke:none;fill:var(--accent)"/>
+  <circle class="walker" id="walker_pietro3" r="2.2"/>
+  <polygon class="walker" id="head_pietro3" points="0,-7.5 4.6,-2 -4.6,-2" style="stroke:none;fill:#4285f4;opacity:.35"/>
 </svg>
 </div>
 
